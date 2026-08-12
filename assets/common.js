@@ -16,3 +16,25 @@ export function makeStoreZip(files){const enc=new TextEncoder(),parts=[],central
 export function downloadBytes(name,bytes,type='application/octet-stream'){const blob=new Blob([bytes],{type});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),500)}
 
 export function html(s=''){return String(s).replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]))}
+
+
+export async function readTextFileSmart(file, preferred='auto'){
+  const buffer=await file.arrayBuffer();
+  const dec=(enc,fatal=false)=>{try{return new TextDecoder(enc,{fatal}).decode(buffer)}catch{return null}};
+  const score=text=>{
+    if(text==null)return -1e9;
+    let v=0;
+    v+=(text.match(/[가-힣]/g)||[]).length*2;
+    v+=(text.match(/[A-Za-z0-9_]/g)||[]).length*.02;
+    v-=(text.match(/�/g)||[]).length*100;
+    v-=(text.match(/(?:Ã.|Â.|ì.|ë.|ê.|ð.)/g)||[]).length*8;
+    return v;
+  };
+  if(preferred==='utf-8')return {text:dec('utf-8')??'',encoding:'UTF-8'};
+  if(preferred==='euc-kr'||preferred==='cp949')return {text:dec('euc-kr')??'',encoding:'CP949 / EUC-KR'};
+  const utfFatal=dec('utf-8',true);
+  if(utfFatal!=null)return {text:utfFatal,encoding:'UTF-8'};
+  const cp=dec('euc-kr');
+  const utf=dec('utf-8');
+  return score(cp)>=score(utf)?{text:cp??'',encoding:'CP949 / EUC-KR'}:{text:utf??'',encoding:'UTF-8'};
+}

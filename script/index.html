@@ -1,19 +1,34 @@
 <!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>ImageMax Script Builder</title><link rel="stylesheet" href="../assets/app.css"></head><body>
 <header class="topbar"><a class="brand" href="../"><span class="brandmark">IM</span>Script Builder</a><nav class="nav"><a class="active" href="./">스크립트</a><a href="../gui/">GUI</a><a href="../reference/">함수 사전</a></nav></header>
-<main class="shell" style="padding-top:14px"><div class="appgrid">
-<aside class="panel"><div class="panel-head"><span class="panel-title">1. ImageMax 프로젝트</span><button id="newProject" class="btn small">초기화</button></div><div class="panel-body">
-<div class="section"><div class="dropzone"><strong>XML 프로젝트 불러오기</strong><div class="hint">EUC-KR/CP949 선언을 자동 감지합니다.</div><input id="xmlFile" type="file" accept=".xml,text/xml" style="margin-top:10px"></div></div>
-<div class="section"><div class="row"><input id="imageSearch" class="input grow" placeholder="이미지 이름 검색" disabled><span id="imageCount" class="badge">0</span></div><div id="imageList" class="image-list" style="margin-top:8px"><div class="hint">XML을 불러오면 이미지 목록이 표시됩니다.</div></div></div>
-<div class="section"><div class="section-label">선택 이미지 미리보기</div><div id="previewBox" style="height:130px;border:1px dashed var(--line);border-radius:10px;display:grid;place-items:center;background:#fafbfc;color:var(--muted);font-size:12px;text-align:center;padding:10px">선택 이미지 정보가 여기에 표시됩니다.</div><label class="hint" style="display:block;margin-top:8px">선택 사항: 이미지 폴더를 지정하면 이름이 같은 파일을 찾아 미리보기를 시도합니다.</label><input id="imageFolder" type="file" webkitdirectory multiple style="font-size:11px;width:100%;margin-top:6px"></div>
-<div class="row wrap"><button id="saveProject" class="btn small">프로젝트 저장</button><button id="exportAll" class="btn primary small">전체 Lua ZIP</button><label class="btn small">프로젝트 열기<input id="loadProject" type="file" accept=".json" hidden></label></div>
-</div></aside>
-<section class="panel workspace"><div style="margin:10px 12px 0;padding:10px 12px;border:1px solid #bfdbfe;background:#eff6ff;border-radius:10px;font-size:12px;line-height:1.55"><b>ImageMax 1회 실행 모델</b><br>여기서 만드는 Lua는 독립 프로그램이 아닙니다. ImageMax 리스트의 <b>스크립트 입력</b> 액션에서 한 번 호출되고 즉시 끝나야 합니다. 리스트 순회와 반복은 ImageMax가 담당하며, 이 생성기는 <code>while true</code> / 자체 무한 재검색 루프를 만들지 않습니다.</div><div class="workbar"><div><b id="workspaceTitle">이미지를 먼저 선택하세요</b><div id="workspaceSub" class="hint">선택한 ImageMax 이미지에 부여할 Lua를 블록으로 구성합니다.</div></div><div class="row"><button id="addConditional" class="btn soft small" disabled>현재 액션/조건</button><button id="addCounter" class="btn small" disabled>N회 인식 상태</button><button id="addRetry" class="btn small" disabled>순회 재확인</button></div></div>
-<div id="ruleList" class="rule-list"><div class="empty"><div><b>XML → 이미지 선택 → 블록 추가</b><p class="hint">Lua 문법을 입력할 필요가 없습니다. 조건과 행동을 선택하면 ImageMax 내장함수 코드로 변환됩니다.</p></div></div></div>
-</section>
-<aside class="panel"><div class="panel-head"><span class="panel-title">2. 선택 이미지 / 생성 결과</span><span id="assignedBadge" class="badge blue">미선택</span></div><div class="panel-body">
-<div id="imageDetails" class="section"><div class="hint">이미지를 선택하면 ROI, 정확도, 활성상태와 기존 액션을 확인할 수 있습니다.</div></div>
-<div class="divider"></div><div class="section"><div class="row"><div class="section-label grow" style="margin:0">생성 Lua</div><button id="copyLua" class="btn small" disabled>복사</button><button id="downloadLua" class="btn primary small" disabled>.lua 저장</button></div><pre id="luaPreview" class="code small">-- 선택한 이미지의 스크립트가 여기에 생성됩니다.</pre></div>
-<div class="section"><div class="section-label">빠른 시작</div><div class="stack"><button class="btn small recipe" data-recipe="click">현재 인식 이미지 → 클릭 (재검색 없음)</button><button class="btn small recipe" data-recipe="key">현재 인식 이미지 → 키 입력</button><button class="btn small recipe" data-recipe="count">현재 이미지 N회 인식 후 동작</button><button class="btn small recipe" data-recipe="retry">다른 이미지 순회 재확인 (1회/순회)</button></div></div>
-</div></aside>
+<main class="shell script-shell"><div class="appgrid script-grid-pro">
+  <aside class="panel project-panel"><div class="panel-head"><span class="panel-title">프로젝트 / 이미지</span><button id="newProject" class="btn small">초기화</button></div><div class="panel-body">
+    <div class="section"><div class="section-label">1. ImageMax XML</div><label class="dropzone compact"><strong>XML 불러오기</strong><span class="hint">EUC-KR/CP949 선언을 자동 감지합니다.</span><input id="xmlFile" type="file" accept=".xml,text/xml"></label></div>
+    <div class="section"><div class="section-label">2. 이미지 폴더 연결</div><label class="dropzone compact"><strong>이미지 폴더 선택</strong><span class="hint">XML의 이미지명과 같은 파일을 자동 연결하여 미리보기합니다.</span><input id="imageFolder" type="file" webkitdirectory directory multiple accept="image/*,.bmp"></label><div id="folderStatus" class="folder-status">아직 폴더를 연결하지 않았습니다.</div></div>
+    <div class="section"><div class="row"><input id="imageSearch" class="input grow" placeholder="이미지 이름 검색" disabled><span id="imageCount" class="badge">0</span></div><div id="imageList" class="image-list image-list-tall" style="margin-top:8px"><div class="hint">XML을 불러오면 이미지 목록이 표시됩니다.</div></div></div>
+    <div class="row wrap"><button id="saveProject" class="btn small">프로젝트 저장</button><label class="btn small">프로젝트 열기<input id="loadProject" type="file" accept=".json" hidden></label><button id="exportAll" class="btn primary small">전체 Lua ZIP</button></div>
+  </div></aside>
+
+  <section class="panel workspace script-workspace">
+    <div class="workbar script-workbar"><div><b id="workspaceTitle">이미지를 먼저 선택하세요</b><div id="workspaceSub" class="hint">XML 이미지 하나를 선택하면 해당 ImageMax 액션에 넣을 스크립트를 만듭니다.</div></div><div class="row"><span class="badge blue">1회 실행</span><button id="addConditional" class="btn small" disabled>+ 직접 조건</button></div></div>
+
+    <div class="builder-flow">
+      <section class="recipe-section">
+        <div class="recipe-head"><div><div class="section-label" style="margin-bottom:3px">자주 쓰는 예문 / 템플릿</div><div class="hint">템플릿을 누르면 선택한 이미지에 맞춰 기본값을 자동 입력합니다. Lua를 직접 작성할 필요가 없습니다.</div></div><div class="row recipe-filter-row"><input id="recipeSearch" class="input" placeholder="템플릿 검색"><select id="recipeCategory" class="select"><option value="all">전체</option><option value="basic">기본</option><option value="image">다른 이미지</option><option value="state">상태/횟수</option><option value="flow">흐름 제어</option><option value="utility">기록/알림</option></select></div></div>
+        <div id="recipeList" class="recipe-grid"></div>
+      </section>
+
+      <section class="current-script-section">
+        <div class="current-script-head"><div><div class="section-label" style="margin-bottom:3px">현재 이미지에 넣을 스크립트</div><div class="hint">블록은 위에서 아래 순서로 한 번 실행되고 즉시 ImageMax 리스트로 반환됩니다.</div></div><div class="row"><button id="addCounter" class="btn small" disabled>+ N회 상태</button><button id="addRetry" class="btn small" disabled>+ 순회 재확인</button></div></div>
+        <div id="ruleList" class="rule-list compact-rule-list"><div class="empty"><div><b>XML → 이미지 선택 → 템플릿 선택</b><p class="hint">먼저 왼쪽에서 이미지를 선택하세요.</p></div></div></div>
+      </section>
+    </div>
+  </section>
+
+  <aside class="panel result-panel"><div class="panel-head"><span class="panel-title">선택 이미지 / 결과</span><span id="assignedBadge" class="badge blue">미선택</span></div><div class="panel-body">
+    <div class="section"><div class="section-label">이미지 미리보기</div><div id="previewBox" class="image-preview-box">선택 이미지 정보가 여기에 표시됩니다.</div></div>
+    <details class="section compact-details" open><summary>이미지 정보 / 기존 액션</summary><div id="imageDetails" style="margin-top:10px"><div class="hint">이미지를 선택하면 ROI, 정확도, 활성상태와 기존 액션을 확인할 수 있습니다.</div></div></details>
+    <div class="divider"></div>
+    <div class="section"><div class="row"><div class="section-label grow" style="margin:0">생성 Lua</div><button id="copyLua" class="btn small" disabled>복사</button><button id="downloadLua" class="btn primary small" disabled>.lua 저장</button></div><div class="execution-note"><b>중요</b> · 이 코드는 ImageMax의 <b>스크립트 입력</b> 액션 한 칸에서 1회만 실행됩니다. 무한 루프는 생성하지 않습니다.</div><pre id="luaPreview" class="code small code-result">-- 선택한 이미지의 스크립트가 여기에 생성됩니다.</pre></div>
+  </div></aside>
 </div></main><div id="toast" class="toast"></div>
 <script type="module" src="./script-builder.js"></script></body></html>

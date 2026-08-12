@@ -18,9 +18,10 @@
       <div class="panel-body">
         <div class="section">
           <div class="section-label">기존 ImageMax 가져오기</div>
-          <label class="dropzone compact"><strong>PreScript.lua</strong><span class="hint">GUIAddTab / GUIAdd* 배치를 읽어옵니다.</span><input id="importPreScript" type="file" accept=".lua,text/x-lua,text/plain"></label>
+          <label class="dropzone compact"><strong>PreScript.lua</strong><span class="hint">GUIAddTab / GUIAdd* 배치를 읽어옵니다. CP949/EUC-KR 파일도 자동 판별합니다.</span><input id="importPreScript" type="file" accept=".lua,text/x-lua,text/plain"></label>
+          <div class="field" style="margin:8px 0 0"><label>Lua 파일 인코딩</label><select id="preScriptEncoding" class="select"><option value="auto">자동 판별 (권장)</option><option value="euc-kr">CP949 / EUC-KR</option><option value="utf-8">UTF-8</option></select></div>
           <label class="dropzone compact" style="margin-top:8px"><strong>ImageMax XML</strong><span class="hint">이미지 목록을 GUI 동작 규칙과 연결합니다.</span><input id="importGuiXml" type="file" accept=".xml,text/xml"></label>
-          <div id="importSummary" class="hint" style="margin-top:8px">새 프로젝트입니다.</div>
+          <div id="importSummary" class="import-summary" style="margin-top:8px">새 프로젝트입니다.</div>
         </div>
         <div class="section">
           <div class="section-label">화면</div>
@@ -48,7 +49,7 @@
     <section class="panel workspace">
       <div class="workbar">
         <div><b id="canvasTitle">사용자</b><div id="canvasMeta" class="hint">ImageMax GUI 좌표 360 × 320</div></div>
-        <div class="row wrap"><span id="zoomBadge" class="badge">200%</span><button id="toggleGrid" class="btn small soft">그리드</button><button id="deleteControl" class="btn danger small" disabled>선택 삭제</button><button id="copyGuiLua" class="btn small">코드 복사</button></div>
+        <div class="row wrap"><span id="zoomBadge" class="badge">150%</span><select id="zoomSelect" class="select zoom-select" title="미리보기 배율"><option value="1">100%</option><option value="1.25">125%</option><option value="1.5" selected>150%</option><option value="2">200%</option></select><button id="toggleGrid" class="btn small soft">그리드</button><button id="deleteControl" class="btn danger small" disabled>선택 삭제</button><button id="copyGuiLua" class="btn small">코드 복사</button></div>
       </div>
       <div id="canvasWrap" class="canvas-wrap imagemax-preview-wrap">
         <div class="imagemax-window">
