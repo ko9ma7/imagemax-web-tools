@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>ImageMax GUI Builder Pro</title>
+  <link rel="stylesheet" href="../assets/app.css">
+</head>
+<body>
+<header class="topbar">
+  <a class="brand" href="../"><span class="brandmark">IM</span>GUI Builder Pro</a>
+  <nav class="nav"><a href="../script/">스크립트</a><a class="active" href="./">GUI</a><a href="../reference/">함수 사전</a></nav>
+</header>
+<main class="shell" style="padding-top:14px">
+  <div class="gui-grid gui-grid-pro">
+    <aside class="panel">
+      <div class="panel-head"><span class="panel-title">프로젝트 / 화면</span><button id="newGui" class="btn small">초기화</button></div>
+      <div class="panel-body">
+        <div class="section">
+          <div class="section-label">기존 ImageMax 가져오기</div>
+          <label class="dropzone compact"><strong>PreScript.lua</strong><span class="hint">GUIAddTab / GUIAdd* 배치를 읽어옵니다.</span><input id="importPreScript" type="file" accept=".lua,text/x-lua,text/plain"></label>
+          <label class="dropzone compact" style="margin-top:8px"><strong>ImageMax XML</strong><span class="hint">이미지 목록을 GUI 동작 규칙과 연결합니다.</span><input id="importGuiXml" type="file" accept=".xml,text/xml"></label>
+          <div id="importSummary" class="hint" style="margin-top:8px">새 프로젝트입니다.</div>
+        </div>
+        <div class="section">
+          <div class="section-label">화면</div>
+          <div id="viewList" class="stack"></div>
+          <div class="row" style="margin-top:8px"><button id="addTab" class="btn small grow">+ 탭</button><button id="addDialog" class="btn small grow">+ Dialog</button></div>
+        </div>
+        <div class="section">
+          <div class="section-label">컨트롤</div>
+          <div class="palette">
+            <button class="tool" data-type="text">텍스트</button><button class="tool" data-type="group">그룹박스</button>
+            <button class="tool" data-type="button">버튼</button><button class="tool" data-type="check">체크박스</button>
+            <button class="tool" data-type="radio">라디오</button><button class="tool" data-type="combo">콤보박스</button>
+            <button class="tool" data-type="edit">에디트</button><button class="tool dialog-only" data-type="picture">Picture</button>
+            <button class="tool dialog-only" data-type="link">Link</button>
+          </div>
+          <p class="hint">탭은 360×320 좌표계를 사용합니다. Picture/Link는 Dialog 전용입니다.</p>
+        </div>
+        <div class="section">
+          <div class="section-label">프로젝트</div>
+          <div class="row wrap"><button id="saveGuiProject" class="btn small">프로젝트 저장</button><label class="btn small">프로젝트 열기<input id="loadGuiProject" type="file" accept=".json" hidden></label><button id="downloadGuiLua" class="btn primary small">PreScript.lua 저장</button></div>
+        </div>
+      </div>
+    </aside>
+
+    <section class="panel workspace">
+      <div class="workbar">
+        <div><b id="canvasTitle">사용자</b><div id="canvasMeta" class="hint">ImageMax GUI 좌표 360 × 320</div></div>
+        <div class="row wrap"><span id="zoomBadge" class="badge">200%</span><button id="toggleGrid" class="btn small soft">그리드</button><button id="deleteControl" class="btn danger small" disabled>선택 삭제</button><button id="copyGuiLua" class="btn small">코드 복사</button></div>
+      </div>
+      <div id="canvasWrap" class="canvas-wrap imagemax-preview-wrap">
+        <div class="imagemax-window">
+          <div class="imagemax-titlebar"><span>사용자 GUI 미리보기</span><span>— □ ×</span></div>
+          <div id="runtimeTabs" class="runtime-tabs"></div>
+          <div id="canvas" class="canvas-frame imagemax-runtime"></div>
+        </div>
+      </div>
+    </section>
+
+    <aside class="panel inspector-panel">
+      <div class="panel-head"><span class="panel-title">속성 / 동작 / 검사</span><span id="selectedBadge" class="badge blue">화면 설정</span></div>
+      <div class="panel-body">
+        <div id="inspector" class="section"></div>
+        <div id="behaviorSection" class="section"></div>
+        <div class="divider"></div>
+        <div class="section">
+          <div class="row" style="justify-content:space-between"><div class="section-label" style="margin:0">검사 결과</div><span id="validationBadge" class="badge ok">정상</span></div>
+          <div id="validationList" class="validation-list"></div>
+        </div>
+        <div class="divider"></div>
+        <details class="section" open>
+          <summary class="section-label clickable">생성 Lua</summary>
+          <pre id="guiLuaPreview" class="code small code-tall"></pre>
+        </details>
+        <details id="advancedLuaWrap" class="section">
+          <summary class="section-label clickable">가져온 고급 Lua</summary>
+          <p class="hint">기존 PreScript에서 GUI 생성부 바깥의 함수/초기화 코드를 보존합니다. 이 영역은 자동 변환하지 않습니다.</p>
+          <textarea id="advancedLua" class="textarea mono" rows="10"></textarea>
+        </details>
+      </div>
+    </aside>
+  </div>
+</main>
+
+<div class="modal-backdrop" id="viewModal"><div class="modal">
+  <h3 id="viewModalTitle">화면 추가</h3>
+  <div class="field"><label>이름</label><input id="viewName" class="input"></div>
+  <div class="field"><label>INI 섹션 (선택)</label><input id="viewIni" class="input" placeholder="비워두면 탭 이름 사용"></div>
+  <div id="dialogSizeFields" class="row" style="display:none"><div class="field grow"><label>Dialog 너비</label><input id="dialogW" type="number" class="input" value="300"></div><div class="field grow"><label>Dialog 높이</label><input id="dialogH" type="number" class="input" value="200"></div></div>
+  <div class="row" style="justify-content:flex-end"><button id="cancelView" class="btn">취소</button><button id="confirmView" class="btn primary">추가</button></div>
+</div></div>
+
+<div class="modal-backdrop" id="behaviorModal"><div class="modal">
+  <h3>GUI 동작 규칙 추가</h3>
+  <div class="field"><label>조건</label><select id="behaviorCondition" class="select"><option value="always">항상 실행</option><option value="eq">현재 변수 == 값</option><option value="ne">현재 변수 != 값</option><option value="gt">현재 변수 &gt; 값</option><option value="ge">현재 변수 &gt;= 값</option><option value="lt">현재 변수 &lt; 값</option><option value="le">현재 변수 &lt;= 값</option></select></div>
+  <div id="behaviorCompareField" class="field"><label>비교 값</label><input id="behaviorCompare" class="input" value="1"></div>
+  <div class="field"><label>실행</label><select id="behaviorAction" class="select"><option value="imageEnable">ImageMax 이미지 활성/비활성</option><option value="controlEnable">다른 GUI 컨트롤 활성/비활성</option><option value="controlValue">다른 GUI 값 변경</option><option value="controlShow">다른 GUI 컨트롤 표시/숨김</option><option value="print">로그 출력</option><option value="message">MessageBox</option><option value="raw">고급 Lua 한 줄</option></select></div>
+  <div id="behaviorDynamic"></div>
+  <div class="row" style="justify-content:flex-end"><button id="cancelBehavior" class="btn">취소</button><button id="confirmBehavior" class="btn primary">규칙 추가</button></div>
+</div></div>
+
+<div id="toast" class="toast"></div>
+<script type="module" src="./gui-builder.js"></script>
+</body></html>

@@ -1,0 +1,989 @@
+[
+  {
+    "name": "Sleep",
+    "signature": "Sleep(uint ms)",
+    "category": "실행/흐름",
+    "description": "ms(밀리초)동안 현재 쓰레드(이미지맥스)의 실행을 일시 중단합니다.",
+    "line": 26
+  },
+  {
+    "name": "GetTickCount",
+    "signature": "t = GetTickCount()",
+    "category": "실행/흐름",
+    "description": "시스템이 시작된 이후 경과한 시간(밀리초)을 반환합니다.",
+    "line": 35
+  },
+  {
+    "name": "print",
+    "signature": "print(string text)",
+    "category": "기타",
+    "description": "로그창에 text를 출력합니다.",
+    "line": 44
+  },
+  {
+    "name": "PassAct",
+    "signature": "PassAct(uint count)",
+    "category": "실행/흐름",
+    "description": "현재 액션 이후 다음 액션 n개를 건너뜁니다.",
+    "line": 51
+  },
+  {
+    "name": "PassAllAct",
+    "signature": "PassAllAct()",
+    "category": "실행/흐름",
+    "description": "현재 액션 이후 다음 액션들을 모두 건너뜁니다.",
+    "line": 56
+  },
+  {
+    "name": "GotoFailAct",
+    "signature": "GotoFailAct()",
+    "category": "실행/흐름",
+    "description": "현재 액션 이후 인식 실패시 액션으로 건너뜁니다.",
+    "line": 61
+  },
+  {
+    "name": "EnableImage",
+    "signature": "EnableImage(bool enable, string imagename)",
+    "category": "이미지",
+    "description": "이미지를 활성 또는 비활성 상태로 변경합니다.",
+    "line": 68
+  },
+  {
+    "name": "IsEnableImage",
+    "signature": "ret = IsEnableImage(string imagename)",
+    "category": "이미지",
+    "description": "이미지의 활성/비활성 상태를 묻습니다.",
+    "line": 77
+  },
+  {
+    "name": "MultiImage",
+    "signature": "ret = MultiImage(string opimage)",
+    "category": "이미지",
+    "description": "멀티이미지 인식을 수행합니다.",
+    "line": 86
+  },
+  {
+    "name": "MultiImage",
+    "signature": "예제1) ret = MultiImage('이미지001&이미지002')",
+    "category": "이미지",
+    "description": "리턴값: 인식여부(0,1)",
+    "line": 90
+  },
+  {
+    "name": "GotoImage",
+    "signature": "GotoImage(string imagename)",
+    "category": "이미지",
+    "description": "다음 인식 순서를 해당 이미지로 변경합니다.",
+    "line": 101
+  },
+  {
+    "name": "ImageSearch",
+    "signature": "ret, acc, ix, iy, sx, sy = ImageSearch(string imagename)",
+    "category": "이미지",
+    "description": "이미지를 인식합니다.",
+    "line": 106
+  },
+  {
+    "name": "ImageSearch",
+    "signature": "ret, acc, ix, iy, sx, sy = ImageSearch(string imagename, int acc, int[] roi)",
+    "category": "이미지",
+    "description": "이미지를 인식합니다.",
+    "line": 108
+  },
+  {
+    "name": "ImageClick",
+    "signature": "ret = ImageClick(string imagename)",
+    "category": "이미지",
+    "description": "이미지 인식 성공시 클릭합니다.",
+    "line": 131
+  },
+  {
+    "name": "ImageClick",
+    "signature": "ret = ImageClick(string imagename, int x, int y, int rand_x, int rand_y, double delaysec)",
+    "category": "이미지",
+    "description": "이미지 인식 성공시 클릭합니다.",
+    "line": 133
+  },
+  {
+    "name": "ImageClick",
+    "signature": "ImageClick()",
+    "category": "이미지",
+    "description": "최근 찾은 이미지를 클릭합니다.",
+    "line": 148
+  },
+  {
+    "name": "ImageClick",
+    "signature": "ImageClick(nil, x, y, rand_x, rand_y, delaysec)",
+    "category": "이미지",
+    "description": "최근 찾은 이미지를 클릭합니다.",
+    "line": 150
+  },
+  {
+    "name": "ImageClickForce",
+    "signature": "ImageClickForce(string imagename)",
+    "category": "이미지",
+    "description": "이미지를 저장할 당시 위치를 강제로 클릭합니다.",
+    "line": 162
+  },
+  {
+    "name": "ImageClickForce",
+    "signature": "ImageClickForce(string imagename, int x, int y, int rand_x, int rand_y, double delaysec)",
+    "category": "이미지",
+    "description": "이미지를 저장할 당시 위치를 강제로 클릭합니다.",
+    "line": 164
+  },
+  {
+    "name": "Mouse",
+    "signature": "Mouse(LBUTTON, CLICK, int x1, int y1)",
+    "category": "마우스",
+    "description": "마우스 입력을 수행합니다.",
+    "line": 184
+  },
+  {
+    "name": "Mouse",
+    "signature": "Mouse(LBUTTON, CLICK, int x1, int y1, int x2, int y2, int rand_x, int rand_y, double delaysec, int iteration, speed, type)",
+    "category": "마우스",
+    "description": "마우스 입력을 수행합니다.",
+    "line": 186
+  },
+  {
+    "name": "MouseDrag",
+    "signature": "MouseDrag(LBUTTON, int x1, int y1, double press_sec1, int x2, int y2, double press_sec2)",
+    "category": "마우스",
+    "description": "마우스 드래그를 수행합니다.",
+    "line": 219
+  },
+  {
+    "name": "MouseDrag",
+    "signature": "MouseDrag(LBUTTON, int x1, int y1, double press_sec1, int x2, int y2, double press_sec2, int rand_x, int rand_y, double delay_sec, int iteration, speed, type)",
+    "category": "마우스",
+    "description": "마우스 드래그를 수행합니다.",
+    "line": 221
+  },
+  {
+    "name": "Keybd",
+    "signature": "Keybd(string text)",
+    "category": "키보드",
+    "description": "키보드 입력을 수행합니다.",
+    "line": 242
+  },
+  {
+    "name": "Keybd",
+    "signature": "Keybd(string text, speed, type)",
+    "category": "키보드",
+    "description": "키보드 입력을 수행합니다.",
+    "line": 244
+  },
+  {
+    "name": "SetImageROI",
+    "signature": "ret = SetImageROI(string imagename, int[] roi)",
+    "category": "이미지",
+    "description": "type: MKEVENT|MESSAGE -- 방식 (활성,비활성)",
+    "line": 257
+  },
+  {
+    "name": "GetImageROI",
+    "signature": "roi = GetImageROI(string imagename)",
+    "category": "이미지",
+    "description": "이미지의 ROI를 가져옵니다.",
+    "line": 266
+  },
+  {
+    "name": "PlaySound",
+    "signature": "PlaySound(string wavfilename, int alarmsec)",
+    "category": "알림/캡처",
+    "description": "n초간 사운드 파일(wav)을 재생합니다.",
+    "line": 297
+  },
+  {
+    "name": "SendKakaoTalk",
+    "signature": "SendKakaoTalk(uint chatroomindex, string text, bool screenshot)",
+    "category": "알림/캡처",
+    "description": "카톡 n번째(1번째방 index=0) 채팅방에 텍스트 또는 스크린샷을 전송합니다.",
+    "line": 302
+  },
+  {
+    "name": "SendKakaoTalk",
+    "signature": "SendKakaoTalk(string name, string text, bool screenshot)",
+    "category": "알림/캡처",
+    "description": "열려있는 카톡 채팅방에 텍스트 또는 스크린샷을 비활성 전송합니다.",
+    "line": 313
+  },
+  {
+    "name": "SendTelegram",
+    "signature": "SendTelegram(string token, string chat_id, string text, string photo_path)",
+    "category": "알림/캡처",
+    "description": "텔레그램을 전송합니다.(텍스트 및 사진 첨부 가능)",
+    "line": 322
+  },
+  {
+    "name": "SendDiscord",
+    "signature": "SendDiscord(string webhook_url, string name, string text, string photo_path)",
+    "category": "알림/캡처",
+    "description": "디스코드를 전송합니다.(텍스트 및 사진 첨부 가능)",
+    "line": 327
+  },
+  {
+    "name": "SaveScreenshot",
+    "signature": "SaveScreenshot(int[] roi)",
+    "category": "알림/캡처",
+    "description": "인식 대상 창의 현재 화면을 스크린샷(png)으로 저장합니다.",
+    "line": 336
+  },
+  {
+    "name": "SaveScreenshot",
+    "signature": "SaveScreenshot(int x, int y, int w, int h)",
+    "category": "알림/캡처",
+    "description": "인식 대상 창의 현재 화면을 스크린샷(png)으로 저장합니다.",
+    "line": 338
+  },
+  {
+    "name": "SaveScreenshot",
+    "signature": "SaveScreenshot(string filename)",
+    "category": "알림/캡처",
+    "description": "인식 대상 창의 현재 화면을 스크린샷(png)으로 저장합니다.",
+    "line": 340
+  },
+  {
+    "name": "SaveScreenshot",
+    "signature": "SaveScreenshot(string filename, int x, int y, int w, int h)",
+    "category": "알림/캡처",
+    "description": "",
+    "line": 342
+  },
+  {
+    "name": "SetScreenshotDir",
+    "signature": "SetScreenshotDir(string dirpath)",
+    "category": "알림/캡처",
+    "description": "스크린샷(png) 파일을 저장할 경로를 지정합니다.",
+    "line": 357
+  },
+  {
+    "name": "Stop",
+    "signature": "Stop()",
+    "category": "실행/흐름",
+    "description": "프로그램을 Stop 상태로 만듭니다.",
+    "line": 374
+  },
+  {
+    "name": "IsStop",
+    "signature": "ret = IsStop()",
+    "category": "실행/흐름",
+    "description": "Stop 상태인지 여부를 묻습니다.",
+    "line": 379
+  },
+  {
+    "name": "IsPause",
+    "signature": "ret = IsPause()",
+    "category": "실행/흐름",
+    "description": "Pause 상태인지 여부를 묻습니다.",
+    "line": 384
+  },
+  {
+    "name": "ReloadPreScript",
+    "signature": "ReloadPreScript()",
+    "category": "실행/흐름",
+    "description": "PreScript를 재실행합니다.",
+    "line": 391
+  },
+  {
+    "name": "OpenScript",
+    "signature": "OpenScript(string scriptname)",
+    "category": "실행/흐름",
+    "description": "다른 스크립트를 열고 실행합니다.",
+    "line": 398
+  },
+  {
+    "name": "NewBits",
+    "signature": "bits = NewBits(int w, int h)",
+    "category": "메모리 이미지",
+    "description": "메모리(이미지) 버퍼를 생성합니다.",
+    "line": 407
+  },
+  {
+    "name": "ReleaseBits",
+    "signature": "ReleaseBits(ulong bits)",
+    "category": "메모리 이미지",
+    "description": "메모리(이미지) 버퍼를 삭제합니다.",
+    "line": 416
+  },
+  {
+    "name": "CaptureScreen",
+    "signature": "CaptureScreen(ulong bits, int[] roi)",
+    "category": "메모리 이미지",
+    "description": "인식 대상 창의 특정 영역을 캡처하여 메모리 버퍼에 저장합니다.",
+    "line": 423
+  },
+  {
+    "name": "CaptureScreen",
+    "signature": "CaptureScreen(ulong bits, int x, int y, int w, int h)",
+    "category": "메모리 이미지",
+    "description": "인식 대상 창의 특정 영역을 캡처하여 메모리 버퍼에 저장합니다.",
+    "line": 425
+  },
+  {
+    "name": "CaptureScreen",
+    "signature": "CaptureScreen(bits, roi)",
+    "category": "메모리 이미지",
+    "description": "인식 대상 창의 특정 영역을 캡처하여 메모리 버퍼에 저장합니다.",
+    "line": 429
+  },
+  {
+    "name": "SaveImageFile",
+    "signature": "SaveImageFile(ulong bits, int w, int h)",
+    "category": "메모리 이미지",
+    "description": "메모리 버퍼를 이미지 파일(png)로 저장합니다.",
+    "line": 436
+  },
+  {
+    "name": "SaveImageFile",
+    "signature": "예제) filepath = SaveImageFile(bits, roi[3], roi[4])",
+    "category": "메모리 이미지",
+    "description": "메모리 버퍼를 이미지 파일(png)로 저장합니다.",
+    "line": 438
+  },
+  {
+    "name": "BitsSearch",
+    "signature": "acc, fx, fy = BitsSearch( { ulong bits, int w, int h } , int[] roi )",
+    "category": "메모리 이미지",
+    "description": "인식 대상 창의 특정 영역을 메모리 버퍼와 비교합니다.",
+    "line": 443
+  },
+  {
+    "name": "NewBits",
+    "signature": "centerframe.bits = NewBits(centerframe.w, centerframe.h)",
+    "category": "메모리 이미지",
+    "description": "리턴값: 유사도, 찾은 위치 시작좌표 x, y",
+    "line": 453
+  },
+  {
+    "name": "CaptureScreen",
+    "signature": "CaptureScreen(centerframe.bits, roi)",
+    "category": "메모리 이미지",
+    "description": "리턴값: 유사도, 찾은 위치 시작좌표 x, y",
+    "line": 457
+  },
+  {
+    "name": "ReleaseBits",
+    "signature": "ReleaseBits(centerframe.bits)",
+    "category": "메모리 이미지",
+    "description": "",
+    "line": 465
+  },
+  {
+    "name": "FindWindow",
+    "signature": "hwnd = FindWindow(string classname, string windowname)",
+    "category": "윈도우",
+    "description": "특정 윈도우의 핸들 값을 가져옵니다.",
+    "line": 474
+  },
+  {
+    "name": "FindWindow",
+    "signature": "예제) hwnd = FindWindow('LDMultiPlayerMainFrame', 'LDMultiPlayer')",
+    "category": "윈도우",
+    "description": "리턴값: 찾은 창 핸들",
+    "line": 478
+  },
+  {
+    "name": "FindWindowEx",
+    "signature": "hwnd = FindWindowEx(HWND hwndParent, HWND hwndChildAfter, string classname, string windowname)",
+    "category": "윈도우",
+    "description": "특정 윈도우에 포함된 자식 윈도우의 핸들 값을 가져옵니다.",
+    "line": 485
+  },
+  {
+    "name": "SendMessage",
+    "signature": "SendMessage(HWND hwnd, uint msg, uint wParam, uint lParam)",
+    "category": "윈도우",
+    "description": "특정 윈도우에 지정된 메시지를 보냅니다.",
+    "line": 494
+  },
+  {
+    "name": "SendMessage",
+    "signature": "SendMessage(hwnd, WM_CLOSE, 0, 0)",
+    "category": "윈도우",
+    "description": "특정 윈도우에 지정된 메시지를 보냅니다.",
+    "line": 498
+  },
+  {
+    "name": "PostMessage",
+    "signature": "PostMessage(HWND hwnd, uint msg, uint wParam, uint lParam)",
+    "category": "윈도우",
+    "description": "특정 윈도우의 메시지큐에 지정된 메시지를 보냅니다.",
+    "line": 505
+  },
+  {
+    "name": "PostMessage",
+    "signature": "PostMessage(hwnd, WM_LBUTTONDOWN, 0, 0)",
+    "category": "윈도우",
+    "description": "특정 윈도우의 메시지큐에 지정된 메시지를 보냅니다.",
+    "line": 509
+  },
+  {
+    "name": "ActivateWindow",
+    "signature": "ActivateWindow(HWND hwnd, bool focus)",
+    "category": "윈도우",
+    "description": "특정 윈도우를 활성화 시킵니다.",
+    "line": 516
+  },
+  {
+    "name": "FindWindow",
+    "signature": "예제) hwnd = FindWindow('Notepad', '제목 없음 - Windows 메모장')",
+    "category": "윈도우",
+    "description": "특정 윈도우를 활성화 시킵니다.",
+    "line": 518
+  },
+  {
+    "name": "ActivateWindow",
+    "signature": "ActivateWindow(hwnd, true)",
+    "category": "윈도우",
+    "description": "특정 윈도우를 활성화 시킵니다.",
+    "line": 520
+  },
+  {
+    "name": "MoveWindow",
+    "signature": "MoveWindow(HWND hwnd, int x, int y, int w, int h)",
+    "category": "윈도우",
+    "description": "특정 윈도우의 위치와 크기를 변경합니다.",
+    "line": 527
+  },
+  {
+    "name": "GetTargetWindowName",
+    "signature": "tw_name = GetTargetWindowName()",
+    "category": "윈도우",
+    "description": "인식 대상 창의 이름을 가져옵니다.",
+    "line": 538
+  },
+  {
+    "name": "GetTargetWindowHandle",
+    "signature": "tw_handle = GetTargetWindowHandle()",
+    "category": "윈도우",
+    "description": "인식 대상 창의 핸들을 가져옵니다.",
+    "line": 547
+  },
+  {
+    "name": "GetTargetFrameHandle",
+    "signature": "tw_handle = GetTargetFrameHandle()",
+    "category": "윈도우",
+    "description": "인식 대상 창의 최상위 핸들을 가져옵니다.",
+    "line": 558
+  },
+  {
+    "name": "GetTargetWindowPos",
+    "signature": "x, y, w, h = GetTargetWindowPos()",
+    "category": "윈도우",
+    "description": "인식 대상 창의 위치를 가져옵니다.",
+    "line": 567
+  },
+  {
+    "name": "GetTargetFramePos",
+    "signature": "x, y, w, h = GetTargetFramePos()",
+    "category": "윈도우",
+    "description": "인식 대상 창의 최상위 윈도우 위치를 가져옵니다.",
+    "line": 576
+  },
+  {
+    "name": "OpenScript",
+    "signature": "OpenScript('세로화면540x960')",
+    "category": "실행/흐름",
+    "description": "",
+    "line": 599
+  },
+  {
+    "name": "OpenScript",
+    "signature": "OpenScript('재실행')",
+    "category": "실행/흐름",
+    "description": "",
+    "line": 618
+  },
+  {
+    "name": "GetClipboardData",
+    "signature": "text = GetClipboardData()",
+    "category": "클립보드",
+    "description": "클립보드에 저장된 텍스트를 가져옵니다.",
+    "line": 625
+  },
+  {
+    "name": "SetClipboardData",
+    "signature": "ret = SetClipboardData(string text, bool unicode)",
+    "category": "클립보드",
+    "description": "클립보드에 텍스트를 저장합니다.",
+    "line": 630
+  },
+  {
+    "name": "GetCursorPos",
+    "signature": "x, y = GetCursorPos()",
+    "category": "좌표/픽셀",
+    "description": "현재 커서 (인식 대상 창 기준) 위치를 가져옵니다.",
+    "line": 637
+  },
+  {
+    "name": "GetPixelRGB",
+    "signature": "r,g,b = GetPixelRGB(int x, int y)",
+    "category": "좌표/픽셀",
+    "description": "(인식 대상 창 기준) x, y 좌표의 R,G,B값 또는 Int값을 가져옵니다.",
+    "line": 642
+  },
+  {
+    "name": "GetPixelInt",
+    "signature": "color = GetPixelInt(int x, int y)",
+    "category": "좌표/픽셀",
+    "description": "(인식 대상 창 기준) x, y 좌표의 R,G,B값 또는 Int값을 가져옵니다.",
+    "line": 644
+  },
+  {
+    "name": "ImageSearchMultipleResults",
+    "signature": "result_count, result_table = ImageSearchMultipleResults(string imagename, SORT_PTDIST, int[] ptCenter)",
+    "category": "이미지",
+    "description": "이미지서치의 결과를 테이블 형식으로 가져옵니다. (찾은 위치를 모두 저장)",
+    "line": 651
+  },
+  {
+    "name": "ImageSearchMultipleResults",
+    "signature": "result_count, result_table = ImageSearchMultipleResults('이미지001')",
+    "category": "이미지",
+    "description": "ptCenter: SORT_PTDIST 정렬시 기준 위치",
+    "line": 663
+  },
+  {
+    "name": "ImageSearchMultipleResults",
+    "signature": "result_count, result_table = ImageSearchMultipleResults('이미지001', SORT_PTDIST, {100, 100})",
+    "category": "이미지",
+    "description": "ptCenter: SORT_PTDIST 정렬시 기준 위치",
+    "line": 667
+  },
+  {
+    "name": "RegisterHotKey",
+    "signature": "RegisterHotKey(string imagename, string hotkey, bool available_in_stop)",
+    "category": "핫키",
+    "description": "특정 이미지에 대한 핫키를 등록합니다.",
+    "line": 684
+  },
+  {
+    "name": "RegisterHotKey",
+    "signature": "RegisterHotKey('이미지001', '<Ctrl>1', true)",
+    "category": "핫키",
+    "description": "특정 이미지에 대한 핫키를 등록합니다.",
+    "line": 690
+  },
+  {
+    "name": "RegisterHotKey",
+    "signature": "RegisterHotKey('이미지002', '<Shift><LButton>', false)",
+    "category": "핫키",
+    "description": "Shift + 좌클릭시 이미지002 인식 후 액션 수행 (stop시 사용 안함)",
+    "line": 694
+  },
+  {
+    "name": "UnregisterHotKey",
+    "signature": "UnregisterHotKey(string imagename)",
+    "category": "핫키",
+    "description": "특정 이미지에 대한 핫키를 해제합니다.",
+    "line": 699
+  },
+  {
+    "name": "RegisterScriptHotKey",
+    "signature": "RegisterScriptHotKey(string script_code, string hotkey, bool available_in_stop)",
+    "category": "핫키",
+    "description": "lua 스크립트에 대한 핫키를 등록합니다.",
+    "line": 704
+  },
+  {
+    "name": "GetCurImageName",
+    "signature": "imagename = GetCurImageName()",
+    "category": "이미지",
+    "description": "현재 순서의 이미지 이름을 가져옵니다.",
+    "line": 715
+  },
+  {
+    "name": "GetIMVer",
+    "signature": "im_ver = GetIMVer()",
+    "category": "유틸리티",
+    "description": "실행중인 이미지맥스의 버전을 가져옵니다.",
+    "line": 722
+  },
+  {
+    "name": "IniSetValue",
+    "signature": "IniSetValue(string app, string key, string value, string ini_filename)",
+    "category": "INI",
+    "description": "ini 폴더의 ini_filename에 값을 저장합니다. (내부적으로 WritePrivateProfileString 호출)",
+    "line": 729
+  },
+  {
+    "name": "IniGetValue",
+    "signature": "value = IniGetValue(string app, string key, string ini_filename)",
+    "category": "INI",
+    "description": "ini 폴더의 ini_filename에서 값을 가져옵니다. (내부적으로 GetPrivateProfileString 호출)",
+    "line": 742
+  },
+  {
+    "name": "GetDist",
+    "signature": "dist = GetDist(double x1, double y1, double x2, double y2)",
+    "category": "좌표/픽셀",
+    "description": "두 점 사이 거리를 구합니다.",
+    "line": 754
+  },
+  {
+    "name": "GetDegree",
+    "signature": "degree = GetDegree(double x1, double y1, double x2, double y2)",
+    "category": "좌표/픽셀",
+    "description": "두 점 사이 각도를 구합니다.",
+    "line": 760
+  },
+  {
+    "name": "GetDist",
+    "signature": "예제) dist = GetDist(100, 100, 200, 200)",
+    "category": "좌표/픽셀",
+    "description": "두 점 사이 각도를 구합니다.",
+    "line": 762
+  },
+  {
+    "name": "GetDegree",
+    "signature": "degree = GetDegree(100, 100, 200, 200)",
+    "category": "좌표/픽셀",
+    "description": "두 점 사이 각도를 구합니다.",
+    "line": 764
+  },
+  {
+    "name": "GetDeltaPoint",
+    "signature": "dx, dy = GetDeltaPoint(double degree, double length)",
+    "category": "좌표/픽셀",
+    "description": "특정 각도로 길이만큼 떨어진 점을 구합니다.",
+    "line": 774
+  },
+  {
+    "name": "GetRandString",
+    "signature": "rand_str = GetRandString(int len, bool allow_num)",
+    "category": "유틸리티",
+    "description": "랜덤한 문자열을 구합니다.",
+    "line": 785
+  },
+  {
+    "name": "GetRandString",
+    "signature": "예제) rand_str = GetRandString(5, true)",
+    "category": "유틸리티",
+    "description": "allow_num: 숫자 허용",
+    "line": 791
+  },
+  {
+    "name": "GUIAddTab",
+    "signature": "GUIAddTab(string tabname, string ini_section)",
+    "category": "GUI",
+    "description": "ini_section: ini에 저장되는 섹션명 (nil이면 탭이름으로 저장)",
+    "line": 870
+  },
+  {
+    "name": "GUISetCurTab",
+    "signature": "GUISetCurTab(string tabname)",
+    "category": "GUI",
+    "description": "GUI item을 추가할 탭을 지정합니다.",
+    "line": 875
+  },
+  {
+    "name": "GUIAddText",
+    "signature": "item_id = GUIAddText(int x, int y, int w, int h, string text)",
+    "category": "GUI",
+    "description": "리턴값: GUI item id",
+    "line": 892
+  },
+  {
+    "name": "GUIAddGroup",
+    "signature": "GUIAddGroup(int x, int y, int w, int h, string text)",
+    "category": "GUI",
+    "description": "x, y, w, h, text, 리턴값: 상동",
+    "line": 899
+  },
+  {
+    "name": "GUIAddButton",
+    "signature": "GUIAddButton(int x, int y, int w, int h, string text, string func)",
+    "category": "GUI",
+    "description": "func: 버튼을 누르면 lua 스크립트에 정의된 func(함수)를 호출합니다.",
+    "line": 906
+  },
+  {
+    "name": "GUIAddCheck",
+    "signature": "GUIAddCheck(int x, int y, int w, int h, string text, string func, string var)",
+    "category": "GUI",
+    "description": "var: 체크박스에 체크시 var(변수)는 1이 됩니다. (체크 해제시 0)",
+    "line": 913
+  },
+  {
+    "name": "GUIAddRadio",
+    "signature": "GUIAddRadio(int x, int y, int w, int h, string text, string func, string var)",
+    "category": "GUI",
+    "description": "var: 버튼 선택시 var(변수)는 라디오버튼의 index가 됩니다. (0, 1, 2..)",
+    "line": 922
+  },
+  {
+    "name": "GUIAddCombo",
+    "signature": "GUIAddCombo(int x, int y, int w, int h, string[] text_table, string func, string var)",
+    "category": "GUI",
+    "description": "var: 항목 선택시 var(변수)는 콤보박스 항목의 index가 됩니다. (0, 1, 2..)",
+    "line": 932
+  },
+  {
+    "name": "GUIAddEdit",
+    "signature": "GUIAddEdit(int x, int y, int w, int h, string text, string func, string var)",
+    "category": "GUI",
+    "description": "var: 에디트박스에 작성한 내용이 var(변수)에 저장됩니다.",
+    "line": 939
+  },
+  {
+    "name": "GUIShow",
+    "signature": "GUIShow()",
+    "category": "GUI",
+    "description": "현재까지 추가된 컨트롤을 윈도우에 보여줍니다.",
+    "line": 944
+  },
+  {
+    "name": "GUIItemShow",
+    "signature": "GUIItemShow(int id, bool show)",
+    "category": "GUI",
+    "description": "id에 해당하는 GUI item을 숨기거나 보여줍니다.",
+    "line": 949
+  },
+  {
+    "name": "GUIItemShow",
+    "signature": "GUIItemShow(btn1_id, false)",
+    "category": "GUI",
+    "description": "id에 해당하는 GUI item을 숨기거나 보여줍니다.",
+    "line": 955
+  },
+  {
+    "name": "GUIItemEnable",
+    "signature": "GUIItemEnable(int id, bool enable)",
+    "category": "GUI",
+    "description": "id에 해당하는 GUI item을 활성 또는 비활성 상태로 만듭니다.",
+    "line": 960
+  },
+  {
+    "name": "GUIItemUpdate",
+    "signature": "GUIItemUpdate(int id, int value)",
+    "category": "GUI",
+    "description": "id에 해당하는 GUI item의 상태를 강제로 수정합니다.",
+    "line": 965
+  },
+  {
+    "name": "GUIItemUpdate",
+    "signature": "GUIItemUpdate(int id, string value)",
+    "category": "GUI",
+    "description": "id에 해당하는 GUI item의 상태를 강제로 수정합니다.",
+    "line": 967
+  },
+  {
+    "name": "GUIUpdate",
+    "signature": "GUIUpdate()",
+    "category": "GUI",
+    "description": "GUIItemUpdate 이후 사용자 GUI를 갱신합니다.",
+    "line": 972
+  },
+  {
+    "name": "GUIAddCombo",
+    "signature": "combo1_id = GUIAddCombo(10, 170, -1, -1, comboText, 'onCombo1', 'var_combo1')",
+    "category": "GUI",
+    "description": "",
+    "line": 988
+  },
+  {
+    "name": "GUIComboGetText",
+    "signature": "string value = GUIComboGetText(int id, int index)",
+    "category": "GUI",
+    "description": "id에 해당하는 콤보박스의 index(0,1,2)에 해당하는 항목 문자열을 가져옵니다.",
+    "line": 995
+  },
+  {
+    "name": "GUIComboSetContent",
+    "signature": "GUIComboSetContent(int id, string[] text_table)",
+    "category": "GUI",
+    "description": "id에 해당하는 콤보박스의 텍스트 항목들을 재설정합니다.",
+    "line": 1000
+  },
+  {
+    "name": "GUIGetCurIniName",
+    "signature": "string ini_name = GUIGetCurIniName()",
+    "category": "GUI",
+    "description": "사용자 GUI의 현재 설정 파일 이름을 가져옵니다.",
+    "line": 1005
+  },
+  {
+    "name": "GUIAddDialog",
+    "signature": "dlg_id = GUIAddDialog(string dlgname, string ini_section, int w, int h)",
+    "category": "GUI",
+    "description": "리턴값: GUI item id",
+    "line": 1018
+  },
+  {
+    "name": "GUIAddText",
+    "signature": "GUIAddText(int parent_id, int x, int y, int w, int h, string text)",
+    "category": "GUI",
+    "description": "x, y, w, h, text, func, var, 리턴값: 상동",
+    "line": 1027
+  },
+  {
+    "name": "GUIAddGroup",
+    "signature": "GUIAddGroup(int parent_id, int x, int y, int w, int h, string text)",
+    "category": "GUI",
+    "description": "x, y, w, h, text, func, var, 리턴값: 상동",
+    "line": 1029
+  },
+  {
+    "name": "GUIAddButton",
+    "signature": "GUIAddButton(int parent_id, int x, int y, int w, int h, string text, string func)",
+    "category": "GUI",
+    "description": "x, y, w, h, text, func, var, 리턴값: 상동",
+    "line": 1031
+  },
+  {
+    "name": "GUIAddCheck",
+    "signature": "GUIAddCheck(int parent_id, int x, int y, int w, int h, string text, string func, string var)",
+    "category": "GUI",
+    "description": "x, y, w, h, text, func, var, 리턴값: 상동",
+    "line": 1033
+  },
+  {
+    "name": "GUIAddRadio",
+    "signature": "GUIAddRadio(int parent_id, int x, int y, int w, int h, string text, string func, string var)",
+    "category": "GUI",
+    "description": "",
+    "line": 1035
+  },
+  {
+    "name": "GUIAddCombo",
+    "signature": "GUIAddCombo(int parent_id, int x, int y, int w, int h, string[] text_table, string func, string var)",
+    "category": "GUI",
+    "description": "",
+    "line": 1037
+  },
+  {
+    "name": "GUIAddEdit",
+    "signature": "GUIAddEdit(int parent_id, int x, int y, int w, int h, string text, string func, string var)",
+    "category": "GUI",
+    "description": "",
+    "line": 1039
+  },
+  {
+    "name": "GUIAddPicture",
+    "signature": "GUIAddPicture(int parent_id, int x, int y, int w, int h, string photo_path)",
+    "category": "GUI",
+    "description": "",
+    "line": 1041
+  },
+  {
+    "name": "GUIAddLink",
+    "signature": "GUIAddLink(int parent_id, int x, int y, int w, int h, string text, string url)",
+    "category": "GUI",
+    "description": "",
+    "line": 1043
+  },
+  {
+    "name": "GUIItemShow",
+    "signature": "GUIItemShow(int id, bool show, bool is_dlg_cancel)",
+    "category": "GUI",
+    "description": "id에 해당하는 대화상자를 열거나 닫습니다.",
+    "line": 1055
+  },
+  {
+    "name": "MessageBox",
+    "signature": "MessageBox(string msg)",
+    "category": "GUI",
+    "description": "메시지 박스를 띄웁니다.",
+    "line": 1074
+  },
+  {
+    "name": "GUIAddText",
+    "signature": "GUIAddText(10, 10, -1, -1, '텍스트')",
+    "category": "GUI",
+    "description": "",
+    "line": 1123
+  },
+  {
+    "name": "GUIAddCheck",
+    "signature": "GUIAddCheck(10, 90, -1, -1, '체크', 'onCheck1', 'check1')",
+    "category": "GUI",
+    "description": "",
+    "line": 1129
+  },
+  {
+    "name": "GUIAddRadio",
+    "signature": "GUIAddRadio(70, 130, -1, -1, '선택2', 'onRadio1')",
+    "category": "GUI",
+    "description": "",
+    "line": 1134
+  },
+  {
+    "name": "GUIAddRadio",
+    "signature": "GUIAddRadio(130, 130, -1, -1, '선택3', 'onRadio1')",
+    "category": "GUI",
+    "description": "",
+    "line": 1136
+  },
+  {
+    "name": "GUIAddCombo",
+    "signature": "GUIAddCombo(10, 170, -1, -1, comboText, 'onCombo1', 'combo1')",
+    "category": "GUI",
+    "description": "",
+    "line": 1141
+  },
+  {
+    "name": "GUIAddEdit",
+    "signature": "GUIAddEdit(10, 210, -1, -1, '편집', 'onEdit1', 'edit1')",
+    "category": "GUI",
+    "description": "",
+    "line": 1144
+  },
+  {
+    "name": "OnStop",
+    "signature": "function OnStop(is_user)",
+    "category": "이벤트",
+    "description": "STOP 버튼 또는 STOP 이벤트 발생 시 호출됩니다.",
+    "line": 0
+  },
+  {
+    "name": "OnPause",
+    "signature": "function OnPause(is_pause)",
+    "category": "이벤트",
+    "description": "PAUSE 상태가 변경될 때 호출됩니다.",
+    "line": 0
+  },
+  {
+    "name": "OnDestroy",
+    "signature": "function OnDestroy()",
+    "category": "이벤트",
+    "description": "ImageMax 프로그램 종료 시 호출됩니다.",
+    "line": 0
+  },
+  {
+    "name": "OnOpenIni",
+    "signature": "function OnOpenIni()",
+    "category": "이벤트",
+    "description": "사용자 GUI 설정 파일 Open 시 호출됩니다.",
+    "line": 0
+  },
+  {
+    "name": "OnSaveIni",
+    "signature": "function OnSaveIni()",
+    "category": "이벤트",
+    "description": "사용자 GUI 설정 파일 Save 시 호출됩니다.",
+    "line": 0
+  },
+  {
+    "name": "OnNewIni",
+    "signature": "function OnNewIni()",
+    "category": "이벤트",
+    "description": "사용자 GUI 설정 파일 New 시 호출됩니다.",
+    "line": 0
+  },
+  {
+    "name": "OnTargetWindowSizeChanged",
+    "signature": "function OnTargetWindowSizeChanged()",
+    "category": "이벤트",
+    "description": "인식 대상 창 크기 변경 시 호출할 수 있습니다.",
+    "line": 0
+  },
+  {
+    "name": "OnTargetWindowNotFound",
+    "signature": "function OnTargetWindowNotFound()",
+    "category": "이벤트",
+    "description": "인식 대상 창이 없어졌을 때 호출할 수 있습니다.",
+    "line": 0
+  }
+]
