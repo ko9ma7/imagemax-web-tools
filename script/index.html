@@ -1,40 +1,98 @@
-<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>ImageMax Script Builder V5</title><link rel="stylesheet" href="../assets/app.css"><script src="../assets/share-config.js"></script></head><body>
-<header class="topbar"><a class="brand" href="../"><span class="brandmark">IM</span>Script Builder</a><nav class="nav"><a class="active" href="./">스크립트</a><a href="../gui/">GUI</a><a href="../reference/">함수 사전</a><a href="../templates/">공유 템플릿</a></nav></header>
-<main class="shell script-shell"><div class="appgrid script-grid-v5">
-  <aside class="panel project-panel"><div class="panel-head"><span class="panel-title">프로젝트 / 이미지</span><button id="newProject" class="btn small">초기화</button></div><div class="panel-body">
-    <div class="section"><div class="section-label">1. ImageMax XML</div><label class="dropzone compact"><strong>XML 불러오기</strong><span class="hint">EUC-KR/CP949 선언을 자동 감지합니다.</span><input id="xmlFile" type="file" accept=".xml,text/xml"></label></div>
-    <div class="section"><div class="section-label">2. 이미지 폴더 연결</div><label class="dropzone compact"><strong>이미지 폴더 선택</strong><span class="hint">XML 이름과 파일명을 연결해 미리보기합니다.</span><input id="imageFolder" type="file" webkitdirectory directory multiple accept="image/*,.bmp"></label><div id="folderStatus" class="folder-status">아직 폴더를 연결하지 않았습니다.</div></div>
-    <div class="section"><div class="row"><input id="imageSearch" class="input grow" placeholder="이미지 이름 검색" disabled><span id="imageCount" class="badge">0</span></div><div id="imageList" class="image-list image-list-tall" style="margin-top:8px"><div class="hint">XML을 불러오면 이미지 목록이 표시됩니다.</div></div></div>
-    <div class="row wrap"><button id="saveProject" class="btn small">프로젝트 저장</button><label class="btn small">프로젝트 열기<input id="loadProject" type="file" accept=".json" hidden></label><button id="exportAll" class="btn primary small">전체 Lua ZIP</button></div>
-  </div></aside>
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>ImageMax Script Builder V6</title>
+  <link rel="stylesheet" href="../assets/app.css">
+  <script src="../assets/share-config.js"></script>
+</head>
+<body>
+<header class="topbar">
+  <a class="brand" href="../"><span class="brandmark">IM</span>Script Builder</a>
+  <nav class="nav"><a class="active" href="./">스크립트</a><a href="../gui/">GUI</a><a href="../reference/">함수 사전</a><a href="../templates/">공유 템플릿</a></nav>
+</header>
+<main class="shell script-shell-v6">
+  <div class="script-grid-v6" id="scriptGrid">
+    <aside class="panel project-panel-v6">
+      <div class="panel-head"><span class="panel-title">프로젝트 / 이미지</span><button id="newProject" class="btn small">초기화</button></div>
+      <div class="panel-body">
+        <div class="section">
+          <div class="section-label">1. ImageMax XML</div>
+          <label class="dropzone compact"><strong>XML 불러오기</strong><span class="hint">EUC-KR/CP949 선언을 자동 감지합니다.</span><input id="xmlFile" type="file" accept=".xml,text/xml"></label>
+        </div>
+        <div class="section">
+          <div class="section-label">2. 이미지 폴더 연결</div>
+          <label class="dropzone compact"><strong>이미지 폴더 선택</strong><span class="hint">XML 이미지명과 같은 파일을 찾아 미리보기합니다.</span><input id="imageFolder" type="file" webkitdirectory directory multiple accept="image/*,.bmp"></label>
+          <div id="folderStatus" class="folder-status">아직 폴더를 연결하지 않았습니다.</div>
+        </div>
+        <div class="section image-browser-v6">
+          <div class="row"><input id="imageSearch" class="input grow" placeholder="이미지 이름 검색" disabled><span id="imageCount" class="badge">0</span></div>
+          <div id="imageList" class="image-list image-list-v6"><div class="hint">XML을 불러오면 이미지 목록이 표시됩니다.</div></div>
+        </div>
+        <div class="row wrap project-actions-v6"><button id="saveProject" class="btn small">프로젝트 저장</button><label class="btn small">프로젝트 열기<input id="loadProject" type="file" accept=".json" hidden></label><button id="exportAll" class="btn primary small">전체 Lua ZIP</button></div>
+      </div>
+    </aside>
 
-  <section class="panel workspace script-workspace-v5">
-    <div class="workbar script-workbar"><div><b id="workspaceTitle">이미지를 먼저 선택하세요</b><div id="workspaceSub" class="hint">XML 이미지 하나를 선택하면 해당 액션에 들어갈 1회 실행 스크립트를 만듭니다.</div></div><div class="row"><span class="badge blue">1회 실행</span><button id="saveAsTemplate" class="btn small soft" disabled>현재 블록 → 내 템플릿</button></div></div>
+    <section class="panel script-center-v6">
+      <div class="workbar script-workbar-v6">
+        <div class="selected-context-v6">
+          <div id="previewBox" class="selected-thumb-v6">이미지</div>
+          <div class="selected-context-copy"><b id="workspaceTitle">이미지를 먼저 선택하세요</b><div id="workspaceSub" class="hint">이미지를 선택하면 해당 ImageMax 액션에 넣을 1회 실행 Lua가 생성됩니다.</div></div>
+        </div>
+        <div class="row wrap"><span class="badge blue">1회 실행</span><span id="assignedBadge" class="badge blue">미선택</span><button id="toggleFocus" class="btn small soft" type="button">코드 집중</button><button id="saveAsTemplate" class="btn small" disabled>현재 블록 → 내 템플릿</button></div>
+      </div>
 
-    <div class="script-main-v5">
-      <section class="template-library-v5">
-        <div class="template-library-head"><div><div class="section-label">템플릿 라이브러리</div><div class="hint">많은 템플릿을 한 번에 펼치지 않고 추천·전체·내 템플릿·커뮤니티로 구분합니다.</div></div><span id="templateCount" class="badge blue">0개</span></div>
-        <div class="template-mode-tabs" role="tablist"><button class="active" data-template-mode="featured">추천</button><button data-template-mode="all">전체</button><button data-template-mode="mine">내 템플릿</button><button data-template-mode="community">커뮤니티</button></div>
-        <div class="template-toolbar-v5"><input id="recipeSearch" class="input grow" placeholder="템플릿 이름·설명 검색"><button id="favoriteOnly" class="btn small" type="button" title="별표한 템플릿만 보기">☆ 즐겨찾기</button><select id="recipeCategory" class="select"><option value="all">모든 카테고리</option><option value="basic">기본</option><option value="image">이미지 연계</option><option value="state">상태/횟수</option><option value="flow">액션 흐름</option><option value="input">입력/좌표</option><option value="utility">알림/기록</option><option value="data">데이터/환경</option><option value="custom">내 템플릿</option></select></div>
-        <div class="template-tools-row"><button id="importTemplate" class="btn small">템플릿 불러오기</button><button id="exportTemplates" class="btn small">내 템플릿 전체 저장</button><button id="shareTemplateUpload" class="btn small soft">파일 업로드 → 공유 신청</button><span id="communityStatus" class="hint">공유 목록 확인 중…</span><input id="templateFile" type="file" accept=".json,.imxtpl.json,.imxtplpack.json" hidden><input id="shareFile" type="file" accept=".json,.imxtpl.json,.imxtplpack.json" hidden></div>
-        <div id="recipeList" class="recipe-grid-v5"></div>
+      <section class="lua-stage-v6">
+        <div class="lua-stage-head">
+          <div><div class="section-label">생성 Lua</div><div class="hint">ImageMax의 <b>스크립트 입력</b> 액션 한 칸에 들어갈 최종 코드입니다.</div></div>
+          <div class="row"><button id="copyLua" class="btn small" disabled>복사</button><button id="downloadLua" class="btn primary small" disabled>.lua 저장</button></div>
+        </div>
+        <div class="execution-note execution-note-v6"><b>1회 실행 원칙</b> · 무한 루프 없이 실행 후 즉시 ImageMax 리스트 제어권으로 반환됩니다.</div>
+        <pre id="luaPreview" class="code code-main-v6">-- 선택한 이미지의 스크립트가 여기에 생성됩니다.</pre>
       </section>
 
-      <section class="builder-column-v5">
-        <div class="builder-card-v5"><div class="current-script-head"><div><div class="section-label">현재 이미지에 적용된 블록</div><div class="hint">위에서 아래로 한 번 실행됩니다. 블록을 펼쳐 이미지·횟수·변수만 바꾸면 됩니다.</div></div><span id="assignedBadge" class="badge blue">미선택</span></div><div id="ruleList" class="rule-list compact-rule-list"><div class="empty"><div><b>XML → 이미지 → 템플릿</b><p class="hint">왼쪽에서 이미지를 선택하세요.</p></div></div></div></div>
-        <div class="builder-card-v5 flow-card-v5"><div class="section-label">실행 흐름 미리보기</div><div id="flowPreview" class="flow-preview-v5"><div class="hint">템플릿을 적용하면 실행 흐름이 표시됩니다.</div></div></div>
+      <section class="work-editor-v6">
+        <div class="work-pane-tabs-v6" role="tablist">
+          <button class="active" type="button" data-work-pane="blocks">블록 편집</button>
+          <button type="button" data-work-pane="flow">실행 흐름</button>
+          <button type="button" data-work-pane="details">이미지 / 기존 액션</button>
+        </div>
+        <div class="work-pane-v6 active" data-work-pane-panel="blocks">
+          <div class="pane-head-v6"><div><div class="section-label">현재 이미지에 적용된 블록</div><div class="hint">블록을 펼쳐 이미지·횟수·변수만 바꾸면 Lua가 즉시 갱신됩니다.</div></div></div>
+          <div id="ruleList" class="rule-list rule-list-v6"><div class="empty"><div><b>XML → 이미지 → 템플릿</b><p class="hint">오른쪽 템플릿을 선택하면 편집 가능한 블록이 추가됩니다.</p></div></div></div>
+        </div>
+        <div class="work-pane-v6" data-work-pane-panel="flow">
+          <div class="pane-head-v6"><div><div class="section-label">실행 흐름 미리보기</div><div class="hint">Lua를 몰라도 현재 로직이 어떤 순서로 실행되는지 확인합니다.</div></div></div>
+          <div id="flowPreview" class="flow-preview-v5 flow-preview-v6"><div class="hint">템플릿을 적용하면 실행 흐름이 표시됩니다.</div></div>
+        </div>
+        <div class="work-pane-v6" data-work-pane-panel="details">
+          <div class="pane-head-v6"><div><div class="section-label">이미지 정보 / 기존 Action List</div><div class="hint">XML의 ROI·정확도·활성 상태와 현재 이미지의 기존 액션을 확인합니다.</div></div></div>
+          <div id="imageDetails"><div class="hint">이미지를 선택하면 정보가 표시됩니다.</div></div>
+        </div>
       </section>
-    </div>
+    </section>
 
-    <div class="script-bottom-zone-v5">
-      <section class="code-dock-v5"><div class="dock-head"><div><div class="section-label">생성 Lua</div><div class="hint">ImageMax의 “스크립트 입력” 액션 한 칸에 들어갈 최종 코드입니다.</div></div><div class="row"><button id="copyLua" class="btn small" disabled>복사</button><button id="downloadLua" class="btn primary small" disabled>.lua 저장</button></div></div><div class="execution-note"><b>1회 실행 원칙</b> · 무한 루프 없이 실행 후 즉시 ImageMax 리스트 제어권으로 반환됩니다.</div><pre id="luaPreview" class="code code-main-v5">-- 선택한 이미지의 스크립트가 여기에 생성됩니다.</pre></section>
-      <aside class="context-dock-v5"><div class="dock-head"><div class="section-label">선택 이미지 / 기존 액션</div></div><div id="previewBox" class="image-preview-box compact-preview">선택 이미지 정보가 여기에 표시됩니다.</div><details class="compact-details"><summary>이미지 정보 / 기존 Action List</summary><div id="imageDetails" style="margin-top:8px"><div class="hint">이미지를 선택하면 ROI, 정확도, 기존 액션을 확인할 수 있습니다.</div></div></details></aside>
-    </div>
-  </section>
-</div></main><div id="toast" class="toast"></div>
+    <aside class="panel template-panel-v6" id="templatePanel">
+      <div class="template-panel-head-v6">
+        <div><span class="panel-title">템플릿 라이브러리</span><div class="hint">원하는 로직을 찾고 <b>적용</b>하면 가운데 Lua에 바로 반영됩니다.</div></div>
+        <span id="templateCount" class="badge blue">0개</span>
+      </div>
+      <div class="template-panel-tools-v6">
+        <div class="template-mode-tabs template-mode-tabs-v6" role="tablist"><button class="active" data-template-mode="featured">추천</button><button data-template-mode="all">전체</button><button data-template-mode="mine">내 템플릿</button><button data-template-mode="community">커뮤니티</button></div>
+        <input id="recipeSearch" class="input" placeholder="템플릿 이름·설명 검색">
+        <div class="row"><select id="recipeCategory" class="select grow"><option value="all">모든 카테고리</option><option value="basic">기본</option><option value="image">이미지 연계</option><option value="state">상태/횟수</option><option value="flow">액션 흐름</option><option value="input">입력/좌표</option><option value="utility">알림/기록</option><option value="data">데이터/환경</option><option value="custom">내 템플릿</option></select><button id="favoriteOnly" class="btn small favorite-toggle-v6" type="button" title="별표한 템플릿만 보기">☆</button></div>
+        <div class="template-quick-actions-v6"><button id="importTemplate" class="btn small">불러오기</button><button id="exportTemplates" class="btn small">내 템플릿 저장</button><button id="shareTemplateUpload" class="btn small soft">공유 신청</button><input id="templateFile" type="file" accept=".json,.imxtpl.json,.imxtplpack.json" hidden><input id="shareFile" type="file" accept=".json,.imxtpl.json,.imxtplpack.json" hidden></div>
+        <div id="communityStatus" class="template-community-status-v6">공유 목록 확인 중…</div>
+      </div>
+      <div id="recipeList" class="recipe-list-v6"></div>
+    </aside>
+  </div>
+</main>
+<div id="toast" class="toast"></div>
 
 <div id="templateSaveModal" class="modal-backdrop" aria-hidden="true"><div class="modal template-save-modal" role="dialog" aria-modal="true" aria-labelledby="templateSaveTitle">
-  <div class="modal-title-row"><div><h3 id="templateSaveTitle">현재 블록을 내 템플릿으로 저장</h3><p class="hint">Lua 코드를 저장하는 것이 아니라 현재 이미지에 구성한 규칙/행동 블록을 재사용 가능한 템플릿 데이터로 저장합니다.</p></div><button id="templateModalClose" class="btn small" type="button">닫기</button></div>
+  <div class="modal-title-row"><div><h3 id="templateSaveTitle">현재 블록을 내 템플릿으로 저장</h3><p class="hint">Lua가 아니라 현재 규칙/행동 블록을 재사용 가능한 템플릿 데이터로 저장합니다.</p></div><button id="templateModalClose" class="btn small" type="button">닫기</button></div>
   <div class="template-modal-grid">
     <div class="field"><label>템플릿 이름</label><input id="templateName" class="input" maxlength="100" placeholder="예: 3회 인식 후 결과 저장"></div>
     <div class="field"><label>카테고리</label><select id="templateCategory" class="select"><option value="custom">내 템플릿</option><option value="basic">기본</option><option value="image">이미지 연계</option><option value="state">상태/횟수</option><option value="flow">액션 흐름</option><option value="input">입력/좌표</option><option value="utility">알림/기록</option><option value="data">데이터/환경</option></select></div>
@@ -45,4 +103,6 @@
   <div class="template-modal-summary"><b id="templateRuleSummary">0개 블록</b><span class="hint">저장 후 .imxtpl.json으로 내보내거나 공유 신청할 수 있습니다.</span></div>
   <div class="row end" style="margin-top:16px"><button id="templateModalCancel" class="btn" type="button">취소</button><button id="templateModalSave" class="btn primary" type="button">내 템플릿으로 저장</button></div>
 </div></div>
-<script type="module" src="./script-builder.js"></script></body></html>
+<script type="module" src="./script-builder.js"></script>
+</body>
+</html>

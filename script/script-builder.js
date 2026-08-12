@@ -4,7 +4,7 @@ import {buildBuiltinTemplates,CATEGORY_LABELS,makeTemplatePack,validateTemplateP
 const SHARE_REPO='ko9ma7/imagemax-web-tools';
 const state={
   xmlName:'',images:[],selected:null,scripts:{},imageFiles:new Map(),imageFolderStats:null,previewUrl:null,
-  customTemplates:[],communityTemplates:[],templateMode:'featured',favorites:new Set(),favoriteOnly:false,version:5
+  customTemplates:[],communityTemplates:[],templateMode:'featured',favorites:new Set(),favoriteOnly:false,version:6
 };
 const els={
   xml:$('#xmlFile'),search:$('#imageSearch'),list:$('#imageList'),count:$('#imageCount'),preview:$('#previewBox'),
@@ -106,7 +106,7 @@ els.search.addEventListener('input',renderImages);
 els.folder.addEventListener('change',()=>rebuildFolderIndex([...els.folder.files]));
 els.recipeSearch.addEventListener('input',renderTemplates);els.recipeCategory.addEventListener('change',renderTemplates);
 $$('[data-template-mode]').forEach(b=>b.onclick=()=>{state.templateMode=b.dataset.templateMode;$$('[data-template-mode]').forEach(x=>x.classList.toggle('active',x===b));renderTemplates()});
-els.favoriteOnly.onclick=()=>{state.favoriteOnly=!state.favoriteOnly;els.favoriteOnly.classList.toggle('active',state.favoriteOnly);els.favoriteOnly.textContent=state.favoriteOnly?'★ 즐겨찾기만':'☆ 즐겨찾기';renderTemplates();persistPreferences()};
+els.favoriteOnly.onclick=()=>{state.favoriteOnly=!state.favoriteOnly;els.favoriteOnly.classList.toggle('active',state.favoriteOnly);els.favoriteOnly.textContent=state.favoriteOnly?'★':'☆';els.favoriteOnly.title=state.favoriteOnly?'즐겨찾기만 표시 중':'별표한 템플릿만 보기';renderTemplates();persistPreferences()};
 function persistPreferences(){try{localStorage.setItem('imagemaxTemplateFavorites',JSON.stringify([...state.favorites]));localStorage.setItem('imagemaxTemplateFavoriteOnly',state.favoriteOnly?'1':'0')}catch{}}
 function toggleFavorite(id){if(state.favorites.has(id))state.favorites.delete(id);else state.favorites.add(id);persistPreferences();renderTemplates()}
 
@@ -125,10 +125,11 @@ function renderSelection(){
 }
 function renderPreview(){
   if(state.previewUrl){URL.revokeObjectURL(state.previewUrl);state.previewUrl=null}const img=selectedImage();
-  if(!img){els.preview.innerHTML='선택 이미지 정보가 여기에 표시됩니다.';return}
-  if(img.name.toLowerCase().endsWith('.grp')){els.preview.innerHTML=`<div class="preview-placeholder"><b>${html(img.name)}</b><span>.grp는 그룹 항목이라 단일 이미지 미리보기가 없습니다.</span></div>`;return}
-  const f=findImageFile(img.name);if(f){state.previewUrl=URL.createObjectURL(f);els.preview.innerHTML=`<img src="${state.previewUrl}" alt="${html(img.name)}"><div class="preview-caption"><b>${html(img.name)}</b><span>${html(f.webkitRelativePath||f.name)}</span></div>`;return}
-  els.preview.innerHTML=`<div class="preview-placeholder"><b>${html(img.name)}</b><span>연결된 이미지 파일을 찾지 못했습니다.</span><small>이미지 폴더를 연결하면 XML 이미지명과 자동 매칭됩니다.</small></div>`;
+  if(!img){els.preview.innerHTML='<span>IMG</span>';els.preview.title='이미지를 선택하세요.';return}
+  els.preview.title=img.name;
+  if(img.name.toLowerCase().endsWith('.grp')){els.preview.innerHTML='<span>GRP</span>';return}
+  const f=findImageFile(img.name);if(f){state.previewUrl=URL.createObjectURL(f);els.preview.innerHTML=`<img src="${state.previewUrl}" alt="${html(img.name)}">`;return}
+  els.preview.innerHTML='<span>NO IMG</span>';
 }
 function renderDetails(){
   const img=selectedImage();if(!img){els.details.innerHTML='<div class="hint">이미지를 선택하면 ROI, 정확도, 활성상태와 기존 액션을 확인할 수 있습니다.</div>';return}
@@ -159,7 +160,7 @@ function applyTemplate(id){
   if(!state.selected)return toast('왼쪽에서 ImageMax 이미지를 먼저 선택하세요.');
   if(state.templateMode==='community')return applyCommunityTemplate(id);
   const t=(state.templateMode==='mine'?allCustomRecipes():builtinTemplates).find(x=>x.id===id);if(!t)return;
-  const made=t.make();const rules=Array.isArray(made)?made:[made];state.scripts[state.selected].push(...clone(rules));renderSelection();persist();toast(`'${t.title}' 템플릿을 추가했습니다.`);
+  const made=t.make();const rules=Array.isArray(made)?made:[made];state.scripts[state.selected].push(...clone(rules));renderSelection();activateWorkPane('blocks');persist();toast(`'${t.title}' 템플릿을 추가했습니다.`);
 }
 
 function imageOptions(value=''){return `<option value="">-- 이미지 선택 --</option>${state.images.map(i=>`<option ${i.name===value?'selected':''} value="${html(i.name)}">${html(i.name)}</option>`).join('')}`}
@@ -279,7 +280,7 @@ function compileRule(r){
   if(r.condition?.type==='current')return (r.then||[]).map(a=>compileAction(a)).join('\n')||'-- 실행할 행동 없음';
   const cond=compileCondition(r.condition),t=(r.then||[]).map(a=>compileAction(a,'    ')).join('\n')||'    -- 실행할 행동 없음',e=r.else?.length?`\nelse\n${r.else.map(a=>compileAction(a,'    ')).join('\n')}`:'';return `if ${cond} then\n${t}${e}\nend`;
 }
-function generatedLua(){if(!state.selected)return '-- 이미지를 선택하세요.';const rules=state.scripts[state.selected]||[];return `-- This is IM's script file. Do not remove this comment line.\n-- ImageMax Web Tools V5 · 1회 실행 액션 스크립트\n-- XML: ${state.xmlName||'-'}\n-- Assigned image: ${state.selected}\n-- 반복/순회 제어권은 ImageMax에 있습니다. 이 파일은 호출 1회 후 즉시 반환됩니다.\n\n${rules.map(compileRule).join('\n\n')||'-- 템플릿을 선택하면 코드가 생성됩니다.'}\n`}
+function generatedLua(){if(!state.selected)return '-- 이미지를 선택하세요.';const rules=state.scripts[state.selected]||[];return `-- This is IM's script file. Do not remove this comment line.\n-- ImageMax Web Tools V6 · 1회 실행 액션 스크립트\n-- XML: ${state.xmlName||'-'}\n-- Assigned image: ${state.selected}\n-- 반복/순회 제어권은 ImageMax에 있습니다. 이 파일은 호출 1회 후 즉시 반환됩니다.\n\n${rules.map(compileRule).join('\n\n')||'-- 템플릿을 선택하면 코드가 생성됩니다.'}\n`}
 function hasBlockingLoop(code){return /\bwhile\s+true\b|\brepeat\b/.test(code)}
 function safeLua(){const code=generatedLua();if(hasBlockingLoop(code))throw new Error('ImageMax 리스트 순회를 막는 무한/반복 대기 구조가 감지되었습니다.');return code}
 function renderLua(){try{els.lua.textContent=safeLua()}catch(e){els.lua.textContent='-- 오류: '+e.message}}
@@ -290,7 +291,7 @@ function ruleSummary(r){if(r.kind==='counter')return `호출 횟수 ${r.threshol
 function renderFlow(){const rules=state.selected?(state.scripts[state.selected]||[]):[];els.flow.innerHTML=rules.length?`<ol>${rules.map((r,i)=>`<li><span class="flow-num">${i+1}</span><div><b>${html(ruleSummary(r))}</b><small>실행 후 즉시 ImageMax 리스트 제어권으로 반환</small></div></li>`).join('')}</ol>`:'<div class="hint">템플릿을 적용하면 사람이 읽을 수 있는 실행 흐름이 여기에 표시됩니다.</div>'}
 
 function normalizeRules(){for(const rules of Object.values(state.scripts||{}))for(const r of rules||[]){if(r.kind==='retry'){r.foundActions=r.foundActions||[];r.exhaustedActions=r.exhaustedActions||[]}if(['elapsed','counter','once','cooldown'].includes(r.kind))r.actions=r.actions||[]}}
-function persist(){try{localStorage.setItem('imagemaxScriptProject',encodeProject({format:'imagemax-web-script',version:5,xmlName:state.xmlName,images:state.images,scripts:state.scripts,selected:state.selected}));localStorage.setItem('imagemaxCustomTemplates',JSON.stringify(state.customTemplates))}catch{}}
+function persist(){try{localStorage.setItem('imagemaxScriptProject',encodeProject({format:'imagemax-web-script',version:6,xmlName:state.xmlName,images:state.images,scripts:state.scripts,selected:state.selected}));localStorage.setItem('imagemaxCustomTemplates',JSON.stringify(state.customTemplates))}catch{}}
 
 function safeTemplateForStore(t){return {id:t.id,title:t.title,desc:t.desc||'',category:CATEGORY_LABELS[t.category]?t.category:'custom',tag:t.tag||'내 템플릿',author:t.author||'',rules:clone(t.rules),createdAt:t.createdAt||new Date().toISOString(),updatedAt:new Date().toISOString()}}
 function openTemplateSaveModal(){
@@ -327,16 +328,25 @@ async function fetchCommunityPack(meta){const path=meta.path||`community/templat
 async function applyCommunityTemplate(id){try{const meta=state.communityTemplates.find(x=>x.id===id);if(!meta)return;const pack=await fetchCommunityPack(meta),t=pack.templates.find(x=>x.id===id)||pack.templates[0];state.scripts[state.selected].push(...clone(t.rules));renderSelection();persist();toast(`'${t.title}' 공유 템플릿을 적용했습니다.`)}catch(e){alert(e.message)}}
 async function downloadCommunityTemplate(id){try{const meta=state.communityTemplates.find(x=>x.id===id);const pack=await fetchCommunityPack(meta);download(`${sanitizeId(meta.title||id)}.imxtpl.json`,JSON.stringify(pack,null,2),'application/json')}catch(e){alert(e.message)}}
 
-$('#saveProject').onclick=()=>download(`${sanitizeId(state.xmlName.replace(/\.xml$/i,'')||'imagemax')}.imxweb.json`,encodeProject({format:'imagemax-web-script',version:5,xmlName:state.xmlName,images:state.images,scripts:state.scripts,selected:state.selected}),'application/json');
+
+function activateWorkPane(name){
+  $$('[data-work-pane]').forEach(b=>b.classList.toggle('active',b.dataset.workPane===name));
+  $$('[data-work-pane-panel]').forEach(p=>p.classList.toggle('active',p.dataset.workPanePanel===name));
+}
+$$('[data-work-pane]').forEach(b=>b.addEventListener('click',()=>activateWorkPane(b.dataset.workPane)));
+const scriptGrid=$('#scriptGrid'),focusBtn=$('#toggleFocus');
+if(focusBtn&&scriptGrid){focusBtn.onclick=()=>{const on=scriptGrid.classList.toggle('code-focus');focusBtn.textContent=on?'전체 화면':'코드 집중';focusBtn.classList.toggle('primary',on)}}
+
+$('#saveProject').onclick=()=>download(`${sanitizeId(state.xmlName.replace(/\.xml$/i,'')||'imagemax')}.imxweb.json`,encodeProject({format:'imagemax-web-script',version:6,xmlName:state.xmlName,images:state.images,scripts:state.scripts,selected:state.selected}),'application/json');
 $('#loadProject').addEventListener('change',async e=>{try{const p=await readJsonFile(e.target.files[0]);if(p.format!=='imagemax-web-script')throw new Error('ImageMax Script Builder 프로젝트가 아닙니다.');Object.assign(state,{xmlName:p.xmlName||'',images:p.images||[],scripts:p.scripts||{},selected:p.selected||null});normalizeRules();els.search.disabled=!state.images.length;renderAll();persist();toast('프로젝트를 불러왔습니다.')}catch(err){alert(err.message)}e.target.value=''});
-$('#exportAll').onclick=()=>{const entries=Object.entries(state.scripts).filter(([,r])=>r?.length);if(!entries.length)return toast('저장할 스크립트 블록이 없습니다.');const prev=state.selected,files=[],manifest={format:'imagemax-script-bundle',executionModel:'single-action-per-list-visit',xmlName:state.xmlName,generatedAt:new Date().toISOString(),assignments:[]};for(const [name] of entries){state.selected=name;const file=`${sanitizeId(name)}_web.lua`;files.push({name:`lua/${file}`,data:'\ufeff'+safeLua()});manifest.assignments.push({image:name,file})}state.selected=prev;files.push({name:'manifest.json',data:JSON.stringify(manifest,null,2)});files.push({name:'README.txt',data:'ImageMax Web Tools V5 export\n각 Lua는 ImageMax의 스크립트 입력 액션 한 칸에서 1회 실행 후 반환됩니다.\n무한 루프는 생성하지 않습니다.\n원본 XML은 수정하지 않습니다.'});downloadBytes(`${sanitizeId(state.xmlName.replace(/\.xml$/i,'')||'imagemax')}_scripts.zip`,makeStoreZip(files),'application/zip');toast(`${entries.length}개 Lua를 ZIP으로 만들었습니다.`)};
+$('#exportAll').onclick=()=>{const entries=Object.entries(state.scripts).filter(([,r])=>r?.length);if(!entries.length)return toast('저장할 스크립트 블록이 없습니다.');const prev=state.selected,files=[],manifest={format:'imagemax-script-bundle',executionModel:'single-action-per-list-visit',xmlName:state.xmlName,generatedAt:new Date().toISOString(),assignments:[]};for(const [name] of entries){state.selected=name;const file=`${sanitizeId(name)}_web.lua`;files.push({name:`lua/${file}`,data:'\ufeff'+safeLua()});manifest.assignments.push({image:name,file})}state.selected=prev;files.push({name:'manifest.json',data:JSON.stringify(manifest,null,2)});files.push({name:'README.txt',data:'ImageMax Web Tools V6 export\n각 Lua는 ImageMax의 스크립트 입력 액션 한 칸에서 1회 실행 후 반환됩니다.\n무한 루프는 생성하지 않습니다.\n원본 XML은 수정하지 않습니다.'});downloadBytes(`${sanitizeId(state.xmlName.replace(/\.xml$/i,'')||'imagemax')}_scripts.zip`,makeStoreZip(files),'application/zip');toast(`${entries.length}개 Lua를 ZIP으로 만들었습니다.`)};
 $('#newProject').onclick=()=>{if(!confirm('현재 작업을 초기화할까요? 내 템플릿은 유지됩니다.'))return;if(state.previewUrl)URL.revokeObjectURL(state.previewUrl);Object.assign(state,{xmlName:'',images:[],selected:null,scripts:{},imageFiles:new Map(),imageFolderStats:null,previewUrl:null});els.xml.value='';els.folder.value='';els.search.value='';els.search.disabled=true;renderFolderStatus();renderAll();persist()};
 
 try{
   const p=JSON.parse(localStorage.getItem('imagemaxScriptProject')||'null');
   if(p?.format==='imagemax-web-script'){Object.assign(state,{xmlName:p.xmlName||'',images:p.images||[],scripts:p.scripts||{},selected:p.selected||null});normalizeRules();els.search.disabled=!state.images.length}
   state.customTemplates=JSON.parse(localStorage.getItem('imagemaxCustomTemplates')||'[]')||[];
-  state.favorites=new Set(JSON.parse(localStorage.getItem('imagemaxTemplateFavorites')||'[]')||[]);state.favoriteOnly=localStorage.getItem('imagemaxTemplateFavoriteOnly')==='1';els.favoriteOnly.classList.toggle('active',state.favoriteOnly);els.favoriteOnly.textContent=state.favoriteOnly?'★ 즐겨찾기만':'☆ 즐겨찾기';
+  state.favorites=new Set(JSON.parse(localStorage.getItem('imagemaxTemplateFavorites')||'[]')||[]);state.favoriteOnly=localStorage.getItem('imagemaxTemplateFavoriteOnly')==='1';els.favoriteOnly.classList.toggle('active',state.favoriteOnly);els.favoriteOnly.textContent=state.favoriteOnly?'★':'☆';els.favoriteOnly.title=state.favoriteOnly?'즐겨찾기만 표시 중':'별표한 템플릿만 보기';
   const pendingRaw=localStorage.getItem('imagemaxPendingTemplateImport');
   if(pendingRaw){
     const pending=validateTemplatePack(JSON.parse(pendingRaw));
