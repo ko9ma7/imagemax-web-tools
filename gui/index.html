@@ -49,13 +49,15 @@
     <section class="panel workspace">
       <div class="workbar">
         <div><b id="canvasTitle">사용자</b><div id="canvasMeta" class="hint">ImageMax GUI 좌표 360 × 320</div></div>
-        <div class="row wrap"><span id="zoomBadge" class="badge">125%</span><select id="zoomSelect" class="select zoom-select" title="미리보기 배율"><option value="1">100%</option><option value="1.25" selected>125%</option><option value="1.5">150%</option><option value="2">200%</option></select><button id="fitCanvas" class="btn small soft">화면 맞춤</button><button id="toggleGrid" class="btn small soft">그리드</button><button id="deleteControl" class="btn danger small" disabled>선택 삭제</button><button id="copyGuiLua" class="btn small">코드 복사</button></div>
+        <div class="row wrap"><span id="zoomBadge" class="badge">125%</span><select id="zoomSelect" class="select zoom-select" title="미리보기 배율"><option value="0.75">75%</option><option value="1">100%</option><option value="1.25" selected>125%</option><option value="1.5">150%</option><option value="2">200%</option></select><button id="fitCanvas" class="btn small soft">화면 맞춤</button><button id="toggleGrid" class="btn small soft">그리드</button><button id="deleteControl" class="btn danger small" disabled>선택 삭제</button><button id="copyGuiLua" class="btn small">코드 복사</button></div>
       </div>
       <div id="canvasWrap" class="canvas-wrap imagemax-preview-wrap">
-        <div class="imagemax-window">
-          <div class="imagemax-titlebar"><span>사용자 GUI 미리보기</span><span>— □ ×</span></div>
-          <div id="runtimeTabs" class="runtime-tabs"></div>
-          <div id="canvas" class="canvas-frame imagemax-runtime"></div>
+        <div id="runtimeStage" class="imagemax-stage">
+          <div id="runtimeWindow" class="imagemax-window">
+            <div class="imagemax-titlebar"><span>사용자 GUI 미리보기</span><span>— □ ×</span></div>
+            <div id="runtimeTabs" class="runtime-tabs"></div>
+            <div id="canvas" class="canvas-frame imagemax-runtime"></div>
+          </div>
         </div>
       </div>
     </section>
