@@ -37,7 +37,7 @@
             <button class="tool" data-type="edit">에디트</button><button class="tool dialog-only" data-type="picture">Picture</button>
             <button class="tool dialog-only" data-type="link">Link</button>
           </div>
-          <p class="hint">탭은 360×320 좌표계를 사용합니다. Picture/Link는 Dialog 전용입니다.</p>
+          <p class="hint">추가 후 캔버스에서 바로 이동합니다. 방향키 1px · Shift+방향키 5px 이동. Picture/Link는 Dialog 전용입니다.</p>
         </div>
         <div class="section">
           <div class="section-label">프로젝트</div>
@@ -49,7 +49,7 @@
     <section class="panel workspace">
       <div class="workbar">
         <div><b id="canvasTitle">사용자</b><div id="canvasMeta" class="hint">ImageMax GUI 좌표 360 × 320</div></div>
-        <div class="row wrap"><span id="zoomBadge" class="badge">150%</span><select id="zoomSelect" class="select zoom-select" title="미리보기 배율"><option value="1">100%</option><option value="1.25">125%</option><option value="1.5" selected>150%</option><option value="2">200%</option></select><button id="toggleGrid" class="btn small soft">그리드</button><button id="deleteControl" class="btn danger small" disabled>선택 삭제</button><button id="copyGuiLua" class="btn small">코드 복사</button></div>
+        <div class="row wrap"><span id="zoomBadge" class="badge">125%</span><select id="zoomSelect" class="select zoom-select" title="미리보기 배율"><option value="1">100%</option><option value="1.25" selected>125%</option><option value="1.5">150%</option><option value="2">200%</option></select><button id="fitCanvas" class="btn small soft">화면 맞춤</button><button id="toggleGrid" class="btn small soft">그리드</button><button id="deleteControl" class="btn danger small" disabled>선택 삭제</button><button id="copyGuiLua" class="btn small">코드 복사</button></div>
       </div>
       <div id="canvasWrap" class="canvas-wrap imagemax-preview-wrap">
         <div class="imagemax-window">

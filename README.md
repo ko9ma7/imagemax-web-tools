@@ -86,3 +86,11 @@ GitHub 저장소에 전체 폴더를 Push하고 Pages/Actions를 활성화하면
 ## 현재 제한
 
 원본 ImageMax XML은 **읽기 전용**으로 다룹니다. XML 스키마 전체와 버전별 직렬화 규칙이 완전히 검증되기 전에 웹에서 XML Action을 직접 삽입/저장하면 실제 ImageMax 프로젝트가 손상될 수 있으므로, 현재 버전은 Lua/PreScript 출력과 연결 정보 생성에 집중합니다.
+
+## V4 UX redesign (2026-08-12)
+
+- Script Builder: two-column top build area + full-width bottom Lua result dock. The generated Lua stays visible while templates/rules are edited.
+- Templates: only six recommended templates are shown first; "전체 보기" exposes the full library. Search/category filters remain available without dominating the screen.
+- Selected Image context: preview, ROI and existing ImageMax Action List moved beside the Lua result instead of consuming a permanent third application column.
+- GUI Builder: default preview zoom changed to 125%, added "화면 맞춤", keyboard nudge (Arrow=1px, Shift+Arrow=5px), and stronger selection outline. Canvas keeps logical ImageMax 360x320 coordinates.
+- Function Reference: one-click signature copy and example copy buttons.
