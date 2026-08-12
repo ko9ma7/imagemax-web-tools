@@ -53,16 +53,12 @@ function actualSize(c){
   if(h===-1){h=['text','check','radio','link'].includes(c.type)?18:['edit','combo'].includes(c.type)?22:c.type==='button'?23:22}
   return {w:Math.max(8,Number(w)||8),h:Math.max(8,Number(h)||8)};
 }
-// ImageMax의 GroupBox는 전달한 w/h보다 Windows 테두리/캡션 여백이 더 보입니다.
-// Lua 값 자체는 그대로 두고 미리보기에서만 네이티브 외곽을 보정합니다.
 function displaySize(c){
   const sz=actualSize(c);
-  if(c.type==='group')return {w:sz.w+16,h:sz.h+12};
-  return sz;
+  return c.type==='group'?{w:sz.w+16,h:sz.h+12}:sz;
 }
 function runtimeOuterSize(view=activeView()){
   const rt=runtimeMetrics(view);
-  // .imagemax-window: 좌/우 padding 8 + border 1x2, title 28 + tabs 28 + bottom padding 8 + border 1x2
   return {w:rt.w+18,h:rt.h+66};
 }
 function normalizeState(){
@@ -76,8 +72,6 @@ function renderRuntimeTabs(){if(state.activeType==='dialog'){el.runtimeTabs.inne
 function renderCanvas(){
   const view=activeView();if(!view)return;
   const {w:W,h:H}=viewSize(view),rt=runtimeMetrics(view),outer=runtimeOuterSize(view),sc=scale();
-  // V7: 모든 컨트롤을 1:1 논리 좌표로 먼저 렌더링한 뒤 Windows 폼 전체를 한 번만 확대합니다.
-  // 개별 font/width/height를 각각 확대하지 않아 CSS rounding과 폰트 폭 누적 오차가 생기지 않습니다.
   el.canvas.style.width=`${rt.w}px`;el.canvas.style.height=`${rt.h}px`;
   el.canvas.style.setProperty('--preview-scale','1');
   el.canvas.style.setProperty('--runtime-inset-x',`${rt.insetX}px`);
@@ -86,15 +80,13 @@ function renderCanvas(){
   el.canvas.style.setProperty('--grid-x',`${rt.insetX}px`);
   el.canvas.style.setProperty('--grid-y',`${rt.insetY}px`);
   el.canvas.classList.toggle('no-grid',!state.showGrid);
-  if(el.runtimeWindow){el.runtimeWindow.style.width=`${outer.w}px`;el.runtimeWindow.style.transform=`scale(${sc})`;}
-  if(el.stage){el.stage.style.width=`${outer.w*sc}px`;el.stage.style.height=`${outer.h*sc}px`;}
+  el.runtimeWindow.style.width=`${outer.w}px`;el.runtimeWindow.style.transform=`scale(${sc})`;
+  el.stage.style.width=`${outer.w*sc}px`;el.stage.style.height=`${outer.h*sc}px`;
   el.title.textContent=view.name;
   el.meta.textContent=state.activeType==='tab'?`ImageMax X/Y 360 × 320 · 원본 좌표 1:1 렌더 후 전체 확대 ${Math.round(sc*100)}%`:`ImageMax Dialog ${W} × ${H} · parent_id 방식`;
   const boundary=state.activeType==='tab'?`<i class="coord-boundary" style="width:${W}px;height:${H}px"></i>`:'';
-  el.canvas.innerHTML=boundary+view.controls.map(controlHtml).join('');
-  $$('.ctrl',el.canvas).forEach(bindControl);el.del.disabled=!selectedControl();
+  el.canvas.innerHTML=boundary+view.controls.map(controlHtml).join('');$$('.ctrl',el.canvas).forEach(bindControl);el.del.disabled=!selectedControl();
 }
-
 function controlHtml(c){const cls=`ctrl ${c.type} ${c.id===state.selectedControlId?'selected':''}`;const sz=displaySize(c),rt=runtimeMetrics();let inner='';
   if(c.type==='check')inner=`<span class="native-check"></span><span>${html(c.text||'')}</span>`;
   else if(c.type==='radio')inner=`<span class="native-radio"></span><span>${html(c.text||'')}</span>`;
@@ -105,7 +97,6 @@ function controlHtml(c){const cls=`ctrl ${c.type} ${c.id===state.selectedControl
   else if(c.type==='link')inner=`<span class="link-value">${html(c.text||'링크')}</span>`;
   else inner=`<span>${html(c.text||c.type)}</span>`;
   return `<div class="${cls}" data-id="${c.id}" title="${html(c.itemVar||c.var||c.func||c.type)}" style="left:${c.x+rt.insetX}px;top:${c.y+rt.insetY}px;width:${sz.w}px;height:${sz.h}px;z-index:${c.z||1}">${inner}<i class="handle"></i></div>`}
-
 function bindControl(node){node.addEventListener('pointerdown',e=>{e.preventDefault();state.selectedControlId=node.dataset.id;renderInspector();renderBehaviorSection();$$('.ctrl',el.canvas).forEach(n=>n.classList.toggle('selected',n.dataset.id===state.selectedControlId));el.del.disabled=false;if(e.target.classList.contains('handle'))startResize(e,node);else startDrag(e,node)})}
 function startDrag(e,node){const c=selectedControl(),sx=e.clientX,sy=e.clientY,ox=c.x,oy=c.y,{w:W,h:H}=viewSize(),rt=runtimeMetrics();node.setPointerCapture(e.pointerId);const move=ev=>{c.x=clamp(Math.round(ox+(ev.clientX-sx)/scale()),0,W);c.y=clamp(Math.round(oy+(ev.clientY-sy)/scale()),0,H);node.style.left=`${c.x+rt.insetX}px`;node.style.top=`${c.y+rt.insetY}px`;updateInspectorXYWH();renderLua();renderValidation()};const up=()=>{node.removeEventListener('pointermove',move);node.removeEventListener('pointerup',up);persist()};node.addEventListener('pointermove',move);node.addEventListener('pointerup',up)}
 function startResize(e,node){e.stopPropagation();const c=selectedControl(),sx=e.clientX,sy=e.clientY,sz=actualSize(c),ow=sz.w,oh=sz.h,{w:W,h:H}=viewSize(),rt=runtimeMetrics();node.setPointerCapture(e.pointerId);if(c.w===-1)c.w=ow;if(c.h===-1)c.h=oh;const maxW=state.activeType==='tab'?Math.max(8,rt.w-rt.insetX-c.x):Math.max(8,W-c.x),maxH=state.activeType==='tab'?Math.max(8,rt.h-rt.insetY-c.y):Math.max(8,H-c.y);const move=ev=>{c.w=clamp(Math.round(ow+(ev.clientX-sx)/scale()),8,maxW);c.h=clamp(Math.round(oh+(ev.clientY-sy)/scale()),8,maxH);const ds=displaySize(c);node.style.width=`${ds.w}px`;node.style.height=`${ds.h}px`;updateInspectorXYWH();renderLua();renderValidation()};const up=()=>{node.removeEventListener('pointermove',move);node.removeEventListener('pointerup',up);persist()};node.addEventListener('pointermove',move);node.addEventListener('pointerup',up)}

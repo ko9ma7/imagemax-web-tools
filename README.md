@@ -1,9 +1,45 @@
-# ImageMax Web Tools V7
+# ImageMax Web Tools V6
 
-GUI 렌더링 안정화와 Script Template Library 가시성 수정 버전입니다.
+ImageMax XML / 이미지 폴더 / PreScript.lua를 읽어 **이미지별 1회 실행 Lua**와 **ImageMax 사용자 GUI**를 시각적으로 구성하는 정적 웹 도구입니다.
 
-- GUI: 1:1 논리좌표 렌더 → 폼 전체 zoom
-- Script: 템플릿 카드 flex-shrink 버그 수정, 생성 Lua 우선 배치
-- 기존 V6의 XML/이미지/120 템플릿/커뮤니티 공유 기능 유지
+## V6 핵심 변경
 
-자세한 내용은 `docs/RELEASE_V7.md`를 확인하세요.
+- Script Builder를 **이미지 → 생성 Lua → 블록 편집** 중심으로 재배치했습니다.
+- 템플릿 라이브러리는 우측 고정 패널로 분리해 항상 찾기 쉽지만 생성 코드보다 큰 영역을 차지하지 않습니다.
+- `코드 집중` 모드로 이미지/템플릿 패널을 숨기고 Lua + 블록만 크게 볼 수 있습니다.
+- 블록 편집 / 실행 흐름 / 이미지·기존 Action List를 탭으로 분리했습니다.
+- 기본 템플릿 120개, 내 템플릿, 커뮤니티 템플릿, 즐겨찾기, 검색/카테고리 필터를 유지합니다.
+- GUI 미리보기에서 360×320을 **폼 외곽 크기**가 아니라 ImageMax의 **X/Y 좌표 범위**로 처리합니다.
+- 실제 ImageMax 폼의 우측/하단 여백을 미리보기에 반영해 정상 Lua가 웹 화면에서 잘려 보이던 문제를 수정했습니다.
+- `w/h=-1` 자동폭은 글자수 추정이 아니라 브라우저의 `Malgun Gothic` 텍스트 폭 측정값으로 계산합니다.
+- 미리보기 확대/축소 시 글꼴, 체크박스, 콤보 화살표도 같은 비율로 확대됩니다.
+- PreScript 가져오기 후 자동 `화면 맞춤`을 수행합니다.
+
+## 실행
+
+GitHub Pages처럼 정적 파일로 배포할 수 있습니다. 저장소 루트에 전체 파일을 올리면 `.github/workflows/pages.yml`이 Pages artifact를 배포합니다.
+
+주요 경로:
+
+- `/script/` Script Builder
+- `/gui/` GUI Builder Pro
+- `/reference/` 함수 사전
+- `/templates/` 공유 템플릿
+
+## ImageMax 스크립트 실행 모델
+
+생성 Lua는 독립 프로그램이 아니라 ImageMax의 `스크립트 입력` 액션에서 **호출 1회 후 즉시 반환**되는 코드입니다. 무한 루프 대신 전역 상태 변수 / 다음 ImageMax 리스트 순회를 사용합니다.
+
+## 템플릿
+
+기본 120개 템플릿을 제공합니다.
+
+- 기본 19
+- 이미지 연계 26
+- 상태/횟수 27
+- 액션 흐름 13
+- 입력/좌표 11
+- 알림/기록 13
+- 데이터/환경 11
+
+사용자가 만든 템플릿은 `.imxtpl.json` 또는 `.imxtplpack.json`으로 내보내고 다시 불러올 수 있습니다. 커뮤니티 제출 구조는 `docs/COMMUNITY_SHARING.md`를 참고하세요.

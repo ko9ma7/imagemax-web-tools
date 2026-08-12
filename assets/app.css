@@ -147,4 +147,34 @@ button,input,select,textarea{font:inherit} button{cursor:pointer} a{color:inheri
   .script-grid-v6{display:block;height:auto}.script-grid-v6>.panel{height:auto;margin-bottom:12px}.project-panel-v6 .panel-body{display:block}.image-list-v6{max-height:360px}.script-center-v6{min-height:850px}.lua-stage-v6{min-height:360px}.work-editor-v6{min-height:380px}.template-panel-v6{position:static;width:auto;display:flex!important;min-height:620px}
 }
 .imagemax-runtime .ctrl.text,.imagemax-runtime .ctrl.check,.imagemax-runtime .ctrl.radio{min-width:0}
-\n\n/* V7 — stable layout / no flex compression */\n.imagemax-stage{position:relative;flex:0 0 auto}\n.imagemax-stage .imagemax-window{position:absolute;left:0;top:0;transform-origin:top left}\n/* The runtime itself is always rendered at 1:1. Zoom is applied once to the whole window. */\n.imagemax-runtime .ctrl{font-size:12px!important;line-height:1.15!important}\n.imagemax-runtime .ctrl.text{padding:0 2px!important}\n.imagemax-runtime .ctrl.group{padding:0!important}\n.imagemax-runtime .group-title{top:-8px!important;left:7px!important;padding:0 3px!important;line-height:15px!important}\n.imagemax-runtime .ctrl.button{padding:0 6px!important}\n.imagemax-runtime .ctrl.check,.imagemax-runtime .ctrl.radio{padding:0 1px!important;gap:4px!important}\n.imagemax-runtime .native-check,.imagemax-runtime .native-radio{width:13px!important;height:13px!important}\n.imagemax-runtime .combo-value{padding-left:5px!important}\n.imagemax-runtime .combo-arrow{width:18px!important;font-size:8px!important}\n.imagemax-runtime .ctrl.edit{padding:0 5px!important}\n.imagemax-runtime .handle{width:8px!important;height:8px!important;right:-5px!important;bottom:-5px!important}\n.gui-grid-pro .imagemax-preview-wrap{display:flex;align-items:center;justify-content:center;overflow:auto;padding:22px}\n\n/* Script: cards must NEVER shrink to tag-only strips inside the flex scroller. */\n.script-grid-v6{grid-template-columns:260px minmax(560px,1fr) 390px}\n.lua-stage-v6{flex:0 0 46%;min-height:320px}\n.code-main-v6{min-height:230px}\n.work-editor-v6{flex:1 1 54%;min-height:250px}\n.template-panel-v6{min-width:0}\n.recipe-list-v6{display:block!important;overflow-y:auto;overflow-x:hidden;padding:10px}\n.recipe-list-v6 .recipe-card{display:flex!important;flex-direction:column;flex:0 0 auto!important;min-height:116px!important;height:auto!important;margin:0 0 8px;padding:11px 12px!important;overflow:visible!important}\n.recipe-list-v6 .recipe-card h3{display:block!important;font-size:13px!important;margin:7px 0 4px!important;line-height:1.35!important;color:var(--text)!important}\n.recipe-list-v6 .recipe-card p{display:-webkit-box!important;flex:0 0 auto!important;min-height:30px;margin:0 0 9px!important;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden!important;color:var(--muted)!important}\n.recipe-list-v6 .template-card-actions{margin-top:auto;display:flex!important;align-items:center!important}\n.recipe-list-v6 .template-card-actions .btn{display:inline-flex!important}\n.template-panel-head-v6{padding:14px 14px 11px}\n.template-panel-tools-v6{padding:11px 12px}\n.template-panel-head-v6 .hint{max-width:280px}\n@media(max-width:1320px){.script-grid-v6{grid-template-columns:235px minmax(500px,1fr) 350px}}\n
+
+.imagemax-stage{position:relative;flex:0 0 auto}
+.imagemax-stage .imagemax-window{position:absolute;left:0;top:0;margin:0;transform-origin:top left}
+.imagemax-runtime .ctrl{font-size:12px;line-height:1.15}
+.imagemax-runtime .ctrl.text{padding:0 2px}
+.imagemax-runtime .ctrl.group{padding:0}
+.imagemax-runtime .group-title{top:-8px;left:7px;padding:0 3px;line-height:15px}
+.imagemax-runtime .ctrl.button{padding:0 6px}
+.imagemax-runtime .ctrl.check,.imagemax-runtime .ctrl.radio{padding:0 1px;gap:4px}
+.imagemax-runtime .native-check,.imagemax-runtime .native-radio{width:13px;height:13px}
+.imagemax-runtime .combo-value{padding-left:5px}
+.imagemax-runtime .combo-arrow{width:18px;font-size:8px}
+.imagemax-runtime .ctrl.edit{padding:0 5px}
+.imagemax-runtime .handle{width:8px;height:8px;right:-5px;bottom:-5px}
+.gui-grid-pro .imagemax-preview-wrap{display:flex;align-items:center;justify-content:center;overflow:auto;padding:22px}
+
+.script-grid-v6{grid-template-columns:260px minmax(560px,1fr) 390px}
+.lua-stage-v6{flex:0 0 46%;min-height:320px}
+.code-main-v6{min-height:230px}
+.work-editor-v6{flex:1 1 54%;min-height:250px}
+.template-panel-v6{min-width:0}
+.recipe-list-v6{display:block;overflow-y:auto;overflow-x:hidden;padding:10px}
+.recipe-list-v6 .recipe-card{display:flex;flex-direction:column;min-height:116px;height:auto;margin:0 0 8px;padding:11px 12px;overflow:visible}
+.recipe-list-v6 .recipe-card h3{display:block;font-size:13px;margin:7px 0 4px;line-height:1.35;color:var(--text)}
+.recipe-list-v6 .recipe-card p{display:-webkit-box;min-height:30px;margin:0 0 9px;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;color:var(--muted)}
+.recipe-list-v6 .template-card-actions{margin-top:auto;display:flex;align-items:center}
+.recipe-list-v6 .template-card-actions .btn{display:inline-flex}
+.template-panel-head-v6{padding:14px 14px 11px}
+.template-panel-tools-v6{padding:11px 12px}
+.template-panel-head-v6 .hint{max-width:280px}
+@media(max-width:1320px){.script-grid-v6{grid-template-columns:235px minmax(500px,1fr) 350px}}
