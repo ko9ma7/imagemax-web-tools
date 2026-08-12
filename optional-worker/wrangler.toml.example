@@ -1,0 +1,10 @@
+name = "imagemax-template-submit"
+main = "worker.js"
+compatibility_date = "2026-08-01"
+
+[vars]
+GITHUB_REPO = "ko9ma7/imagemax-web-tools"
+ALLOWED_ORIGIN = "https://ko9ma7.github.io"
+
+# Store GITHUB_TOKEN as a secret, never here:
+# npx wrangler secret put GITHUB_TOKEN

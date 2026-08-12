@@ -1,0 +1,26 @@
+{
+  "format": "imagemax-template-pack",
+  "version": 1,
+  "name": "Sample ImageMax Template Pack",
+  "description": "공유 포맷 예시",
+  "author": "example",
+  "templates": [
+    {
+      "id": "sample_count_click",
+      "title": "3회 호출 후 현재 이미지 클릭",
+      "desc": "ImageMax 리스트에서 이 스크립트 액션이 호출될 때마다 카운트하고 3회째 클릭합니다.",
+      "category": "state",
+      "tag": "샘플",
+      "rules": [
+        {
+          "kind": "counter",
+          "varName": "sample_count",
+          "threshold": 3,
+          "actions": [
+            {"type": "currentClick", "params": {}}
+          ]
+        }
+      ]
+    }
+  ]
+}
