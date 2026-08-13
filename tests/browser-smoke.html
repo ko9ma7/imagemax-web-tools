@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="ko">
+<head><meta charset="utf-8"><title>ImageMax Web Tools Browser Smoke Test</title></head>
+<body><pre id="result">RUNNING</pre><iframe id="app" style="width:1550px;height:900px"></iframe>
+<script type="module">
+const output=document.querySelector('#result'),frame=document.querySelector('#app'),checks=[];
+const wait=ms=>new Promise(resolve=>setTimeout(resolve,ms));
+const assert=(name,condition,detail='')=>checks.push({name,pass:!!condition,detail});
+async function load(path){frame.src=path;await new Promise((resolve,reject)=>{const timer=setTimeout(()=>reject(new Error(`${path} load timeout`)),8000);frame.onload=()=>{clearTimeout(timer);resolve()}});await wait(250);return frame.contentDocument}
+try{
+  localStorage.clear();
+  localStorage.setItem('imagemaxGuiProject',JSON.stringify({format:'imagemax-web-gui',version:7,tabs:[{id:'tab_test',name:'테스트',iniSection:'',controls:[{id:'check_test',type:'check',x:0,y:46,w:-1,h:-1,text:'히마리',func:'onHimari',var:'check_Himari',itemVar:'check_Cri1',behaviors:[{id:'beh_test',condition:'eq',compare:'1',action:'print',text:'히마리 선택'}]}]}],dialogs:[],activeType:'tab',activeId:'tab_test',selectedControlId:null,xmlImages:[],xmlMeta:null,imported:{sourceName:'',preludeCode:'',postludeCode:'',encoding:'',parseWarnings:[]},showGrid:false,scale:1}));
+  const gui=await load('../gui/'),win=gui.querySelector('#runtimeWindow'),canvas=gui.querySelector('#canvas'),control=gui.querySelector('[data-id="check_test"]'),title=gui.querySelector('.imagemax-titlebar');
+  const wr=win.getBoundingClientRect(),cr=canvas.getBoundingClientRect(),rr=control.getBoundingClientRect();
+  assert('GUI user surface size',Math.round(wr.width)===382&&Math.round(wr.height)===346,`${wr.width}x${wr.height}`);
+  assert('ImageMax chrome hidden',getComputedStyle(title).display==='none',getComputedStyle(title).display);
+  assert('Lua coordinate origin',Math.round(rr.left-cr.left)===10&&Math.round(rr.top-cr.top)===53,`${rr.left-cr.left},${rr.top-cr.top}`);
+  gui.querySelector('#toggleGuiTest').click();const check=gui.querySelector('[data-id="check_test"] input');check.click();await wait(50);
+  const guiLog=gui.querySelector('#guiTestLog').textContent;
+  assert('GUI control interaction',check.checked&&guiLog.includes('check_Himari = 1'),guiLog);
+  assert('GUI callback log',guiLog.includes('onHimari(check_Cri1)')&&guiLog.includes('히마리 선택'),guiLog);
+
+  localStorage.setItem('imagemaxScriptProject',JSON.stringify({format:'imagemax-web-script',version:6,xmlName:'test.xml',images:[{name:'히마리.png',index:1,accuracy:90,group:0,enabled:true,roi:[0,0,100,100],rect:[0,0,20,20],actions:[]}],selected:'히마리.png',scripts:{'히마리.png':[{kind:'counter',varName:'counter',threshold:2,actions:[{type:'print',params:{text:'두 번째 호출'}}]}]}}));
+  const script=await load('../script/');script.querySelector('#testLua').click();await wait(30);script.querySelector('#runSimulation').click();await wait(30);
+  const scriptLog=script.querySelector('#simulationLog').textContent;
+  assert('Script call state',script.querySelector('#simulationState').textContent.includes('호출 2회'),script.querySelector('#simulationState').textContent);
+  assert('Script branch log',scriptLog.includes('counter = 2 / 2')&&scriptLog.includes('두 번째 호출'),scriptLog);
+  assert('No real device action',scriptLog.includes('실제 장치 입력 없이'),scriptLog);
+}catch(error){checks.push({name:'uncaught',pass:false,detail:error.stack||String(error)})}
+output.textContent=JSON.stringify({pass:checks.every(x=>x.pass),checks},null,2);
+</script></body></html>

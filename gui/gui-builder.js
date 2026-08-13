@@ -3,12 +3,14 @@ import {$,$$,escLua,luaId,download,copyText,toast,uid,encodeProject,readJsonFile
 const TAB_W=360, TAB_H=320;
 // ImageMax 문서의 360/320은 X/Y 좌표 입력 범위입니다. 실제 사용자 GUI 클라이언트는
 // 컨트롤이 우측/하단으로 조금 더 표시될 수 있는 여백을 갖습니다.
-const TAB_RUNTIME_EXTRA_X=22, TAB_RUNTIME_EXTRA_Y=18, TAB_RUNTIME_INSET_X=20, TAB_RUNTIME_INSET_Y=5;
-const state={format:'imagemax-web-gui',version:6,tabs:[{id:uid('tab'),name:'사용자',iniSection:'',controls:[]}],dialogs:[],activeType:'tab',activeId:null,selectedControlId:null,xmlImages:[],xmlMeta:null,imported:{sourceName:'',preludeCode:'',postludeCode:'',encoding:'',parseWarnings:[]},showGrid:false,scale:1};
+const TAB_RUNTIME_EXTRA_X=22, TAB_RUNTIME_EXTRA_Y=26, TAB_RUNTIME_INSET_X=10, TAB_RUNTIME_INSET_Y=7;
+const state={format:'imagemax-web-gui',version:7,tabs:[{id:uid('tab'),name:'사용자',iniSection:'',controls:[]}],dialogs:[],activeType:'tab',activeId:null,selectedControlId:null,xmlImages:[],xmlMeta:null,imported:{sourceName:'',preludeCode:'',postludeCode:'',encoding:'',parseWarnings:[]},showGrid:false,scale:1};
 const scale=()=>Number(state.scale)||1;
 state.activeId=state.tabs[0].id;
 
-const el={list:$('#viewList'),canvas:$('#canvas'),title:$('#canvasTitle'),meta:$('#canvasMeta'),inspector:$('#inspector'),behavior:$('#behaviorSection'),badge:$('#selectedBadge'),lua:$('#guiLuaPreview'),del:$('#deleteControl'),modal:$('#viewModal'),validation:$('#validationList'),validationBadge:$('#validationBadge'),runtimeTabs:$('#runtimeTabs'),advanced:$('#advancedLua'),advancedWrap:$('#advancedLuaWrap'),importSummary:$('#importSummary'),behaviorModal:$('#behaviorModal'),stage:$('#runtimeStage'),runtimeWindow:$('#runtimeWindow')};
+const el={list:$('#viewList'),canvas:$('#canvas'),title:$('#canvasTitle'),meta:$('#canvasMeta'),inspector:$('#inspector'),behavior:$('#behaviorSection'),badge:$('#selectedBadge'),lua:$('#guiLuaPreview'),del:$('#deleteControl'),modal:$('#viewModal'),validation:$('#validationList'),validationBadge:$('#validationBadge'),runtimeTabs:$('#runtimeTabs'),advanced:$('#advancedLua'),advancedWrap:$('#advancedLuaWrap'),importSummary:$('#importSummary'),behaviorModal:$('#behaviorModal'),stage:$('#runtimeStage'),runtimeWindow:$('#runtimeWindow'),testButton:$('#toggleGuiTest'),testPanel:$('#guiTestPanel'),testLog:$('#guiTestLog')};
+let guiTestMode=false,guiTestSequence=0;
+const guiTestValues=new Map(),guiTestStates=new Map();
 
 const defaults={
   text:{x:10,y:10,w:-1,h:-1,text:'텍스트',itemVar:''},
@@ -59,10 +61,10 @@ function displaySize(c){
 }
 function runtimeOuterSize(view=activeView()){
   const rt=runtimeMetrics(view);
-  return state.activeType==='tab'?{w:420,h:489}:{w:rt.w+18,h:rt.h+66};
+  return state.activeType==='tab'?{w:382,h:346}:{w:rt.w+18,h:rt.h+66};
 }
 function normalizeState(){
-  const incomingVersion=Number(state.version)||0;state.version=6;state.xmlImages=state.xmlImages||[];state.scale=incomingVersion<6?1:(Number(state.scale)||1);state.imported=state.imported||{sourceName:'',preludeCode:'',postludeCode:'',encoding:'',parseWarnings:[]};state.imported.encoding=state.imported.encoding||'';state.imported.parseWarnings=state.imported.parseWarnings||[];state.showGrid=incomingVersion<5?false:state.showGrid!==false;
+  const incomingVersion=Number(state.version)||0;state.version=7;state.xmlImages=state.xmlImages||[];state.scale=incomingVersion<6?1:(Number(state.scale)||1);state.imported=state.imported||{sourceName:'',preludeCode:'',postludeCode:'',encoding:'',parseWarnings:[]};state.imported.encoding=state.imported.encoding||'';state.imported.parseWarnings=state.imported.parseWarnings||[];state.showGrid=incomingVersion<5?false:state.showGrid!==false;
   for(const v of [...(state.tabs||[]),...(state.dialogs||[])])for(const c of v.controls||[]){c.itemVar=c.itemVar||'';c.behaviors=c.behaviors||[];if(c.type==='radio')c.radioGroup=c.radioGroup||'';}
 }
 
@@ -85,21 +87,31 @@ function renderCanvas(){
   el.runtimeWindow.style.width=`${outer.w}px`;el.runtimeWindow.style.height=`${outer.h}px`;el.runtimeWindow.style.transform=`scale(${sc})`;
   el.stage.style.width=`${outer.w*sc}px`;el.stage.style.height=`${outer.h*sc}px`;
   el.title.textContent=view.name;
-  el.meta.textContent=state.activeType==='tab'?`ImageMax 2.67 실측 420 × 489 · Lua 좌표 360 × 320 · ${Math.round(sc*100)}%`:`ImageMax Dialog ${W} × ${H} · parent_id 방식`;
+  el.meta.textContent=(state.activeType==='tab'?`ImageMax 사용자 영역 실측 382 × 346 · Lua 좌표 360 × 320 · ${Math.round(sc*100)}%`:`ImageMax Dialog ${W} × ${H} · parent_id 방식`)+(guiTestMode?' · 동작 테스트 중':'');
   const boundary=state.activeType==='tab'?`<i class="coord-boundary" style="width:${W}px;height:${H}px"></i>`:'';
-  el.canvas.innerHTML=boundary+view.controls.map(controlHtml).join('');$$('.ctrl',el.canvas).forEach(bindControl);el.del.disabled=!selectedControl();
+  el.canvas.classList.toggle('testing',guiTestMode);el.canvas.innerHTML=boundary+view.controls.map(controlHtml).join('');$$('.ctrl',el.canvas).forEach(guiTestMode?bindTestControl:bindControl);el.del.disabled=guiTestMode||!selectedControl();
 }
-function controlHtml(c){const cls=`ctrl ${c.type} ${c.id===state.selectedControlId?'selected':''}`;const sz=displaySize(c),rt=runtimeMetrics();let inner='';
-  if(c.type==='check')inner=`<span class="native-check"></span><span>${html(c.text||'')}</span>`;
-  else if(c.type==='radio')inner=`<span class="native-radio"></span><span>${html(c.text||'')}</span>`;
-  else if(c.type==='combo')inner=`<span class="combo-value">${html((c.items||[])[0]||'')}</span><span class="combo-arrow">▼</span>`;
-  else if(c.type==='edit')inner=`<span class="edit-value">${html(c.text||'')}</span>`;
+function controlHtml(c){const cls=`ctrl ${c.type} ${!String(c.text||'').trim()?'empty-label':''} ${c.id===state.selectedControlId?'selected':''}`;const sz=displaySize(c),rt=runtimeMetrics();let inner='';
+  const value=guiTestValue(c);
+  if(c.type==='check')inner=guiTestMode?`<label class="native-test-choice"><input type="checkbox" ${value?'checked':''}><span>${html(c.text||'')}</span></label>`:`<span class="native-check"></span><span>${html(c.text||'')}</span>`;
+  else if(c.type==='radio')inner=guiTestMode?`<label class="native-test-choice"><input type="radio" name="${html(c.radioGroup||c.var||c.id)}" ${value?'checked':''}><span>${html(c.text||'')}</span></label>`:`<span class="native-radio"></span><span>${html(c.text||'')}</span>`;
+  else if(c.type==='combo')inner=guiTestMode?`<select class="native-test-select">${(c.items||[]).map((x,i)=>`<option ${i===Number(value)?'selected':''}>${html(x)}</option>`).join('')}</select>`:`<span class="combo-value">${html((c.items||[])[0]||'')}</span><span class="combo-arrow">▼</span>`;
+  else if(c.type==='edit')inner=guiTestMode?`<input class="native-test-edit" value="${html(value)}">`:`<span class="edit-value">${html(c.text||'')}</span>`;
   else if(c.type==='group')inner=`<span class="group-title">${html(c.text||'')}</span>`;
   else if(c.type==='picture')inner=`<span>🖼 ${html(c.path||'image.png')}</span>`;
   else if(c.type==='link')inner=`<span class="link-value">${html(c.text||'링크')}</span>`;
+  else if(c.type==='button'&&guiTestMode)inner=`<button class="native-test-button" type="button">${html(c.text||'버튼')}</button>`;
   else inner=`<span>${html(c.text||c.type)}</span>`;
-  const nativeOffset=c.type==='group'?'transform:translate(-9px,-11px);':'';
+  const nativeOffset=c.type==='group'?'transform:translate(-8px,-11px);':'';
   return `<div class="${cls}" data-id="${c.id}" title="${html(c.itemVar||c.var||c.func||c.type)}" style="left:${c.x+rt.insetX}px;top:${c.y+rt.insetY}px;width:${sz.w}px;height:${sz.h}px;${nativeOffset}z-index:${c.z||1}">${inner}<i class="handle"></i></div>`}
+function guiTestValue(c){if(guiTestValues.has(c.id))return guiTestValues.get(c.id);const value=c.type==='edit'?c.text||'':c.type==='combo'?0:0;guiTestValues.set(c.id,value);return value}
+function guiTestLog(kind,message){guiTestSequence++;const row=document.createElement('div');row.className=`gui-test-row ${kind}`;row.innerHTML=`<span>${String(guiTestSequence).padStart(2,'0')}</span><b>${html(kind)}</b><code>${html(message)}</code>`;el.testLog.append(row);el.testLog.scrollTop=el.testLog.scrollHeight}
+function luaComparable(value){const s=String(value??'').trim();if(/^[-+]?\d+(\.\d+)?$/.test(s))return Number(s);if(s==='true')return true;if(s==='false')return false;return s}
+function behaviorPass(value,b){if(b.condition==='always')return true;const a=luaComparable(value),z=luaComparable(b.compare);return {eq:a===z,ne:a!==z,gt:a>z,ge:a>=z,lt:a<z,le:a<=z}[b.condition]??false}
+function testControlByItemVar(itemVar){return allControls().find(x=>x.itemVar===itemVar)}
+function applyGuiTestBehavior(source,b){const current=guiTestValue(source);if(!behaviorPass(current,b)){guiTestLog('조건',`${source.var||source.text||source.type}: ${behaviorConditionLabel(b)} → 거짓`);return}guiTestLog('조건',`${source.var||source.text||source.type}: ${behaviorConditionLabel(b)} → 참`);if(b.action==='imageEnable'){guiTestLog('ImageMax',`EnableImage(${b.enable?'true':'false'}, ${b.targetImage||'대상 없음'})`);return}if(['controlEnable','controlShow','controlValue'].includes(b.action)){const target=testControlByItemVar(b.targetItemVar),node=target?el.canvas.querySelector(`[data-id="${target.id}"]`):null;if(!target||!node){guiTestLog('오류',`대상 컨트롤 ${b.targetItemVar||'(없음)'}을 찾지 못했습니다.`);return}const status=guiTestStates.get(target.id)||{enabled:true,shown:true};if(b.action==='controlEnable'){status.enabled=!!b.enable;node.querySelectorAll('input,select,button').forEach(x=>x.disabled=!status.enabled);guiTestLog('GUI',`${b.targetItemVar} ${status.enabled?'활성':'비활성'}`)}else if(b.action==='controlShow'){status.shown=!!b.show;node.hidden=!status.shown;guiTestLog('GUI',`${b.targetItemVar} ${status.shown?'표시':'숨김'}`)}else{guiTestValues.set(target.id,luaComparable(b.value));guiTestLog('GUI',`${b.targetItemVar} = ${b.value}`);renderCanvas()}guiTestStates.set(target.id,status);return}if(b.action==='print'||b.action==='message'){guiTestLog(b.action==='print'?'Print':'MessageBox',b.text||'');return}guiTestLog('Lua',`${b.raw||'(빈 사용자 Lua)'} · 안전상 실행하지 않음`)}
+function fireGuiTest(c,value){guiTestValues.set(c.id,value);if(c.type==='radio'&&value){for(const other of allControls().filter(x=>x.type==='radio'&&x.id!==c.id&&(x.radioGroup||x.var)===(c.radioGroup||c.var)))guiTestValues.set(other.id,0)}if(c.var)guiTestLog('값',`${c.var} = ${JSON.stringify(value)}`);guiTestLog('콜백',c.func?`${c.func}(${c.itemVar||c.id})`:'연결된 콜백 없음');for(const b of c.behaviors||[])applyGuiTestBehavior(c,b)}
+function bindTestControl(node){const c=activeView()?.controls.find(x=>x.id===node.dataset.id);if(!c)return;const input=node.querySelector('input,select,button');if(!input)return;if(c.type==='button')input.onclick=()=>fireGuiTest(c,1);else if(c.type==='edit')input.onchange=()=>fireGuiTest(c,input.value);else input.onchange=()=>{const value=c.type==='combo'?input.selectedIndex:input.checked?1:0;fireGuiTest(c,value);if(c.type==='radio')renderCanvas()};const status=guiTestStates.get(c.id);if(status){input.disabled=!status.enabled;node.hidden=!status.shown}}
 function bindControl(node){node.addEventListener('pointerdown',e=>{e.preventDefault();state.selectedControlId=node.dataset.id;renderInspector();renderBehaviorSection();$$('.ctrl',el.canvas).forEach(n=>n.classList.toggle('selected',n.dataset.id===state.selectedControlId));el.del.disabled=false;if(e.target.classList.contains('handle'))startResize(e,node);else startDrag(e,node)})}
 function startDrag(e,node){const c=selectedControl(),sx=e.clientX,sy=e.clientY,ox=c.x,oy=c.y,{w:W,h:H}=viewSize(),rt=runtimeMetrics();node.setPointerCapture(e.pointerId);const move=ev=>{c.x=clamp(Math.round(ox+(ev.clientX-sx)/scale()),0,W);c.y=clamp(Math.round(oy+(ev.clientY-sy)/scale()),0,H);node.style.left=`${c.x+rt.insetX}px`;node.style.top=`${c.y+rt.insetY}px`;updateInspectorXYWH();renderLua();renderValidation()};const up=()=>{node.removeEventListener('pointermove',move);node.removeEventListener('pointerup',up);persist()};node.addEventListener('pointermove',move);node.addEventListener('pointerup',up)}
 function startResize(e,node){e.stopPropagation();const c=selectedControl(),sx=e.clientX,sy=e.clientY,sz=actualSize(c),ow=sz.w,oh=sz.h,{w:W,h:H}=viewSize(),rt=runtimeMetrics();node.setPointerCapture(e.pointerId);if(c.w===-1)c.w=ow;if(c.h===-1)c.h=oh;const maxW=state.activeType==='tab'?Math.max(8,rt.w-rt.insetX-c.x):Math.max(8,W-c.x),maxH=state.activeType==='tab'?Math.max(8,rt.h-rt.insetY-c.y):Math.max(8,H-c.y);const move=ev=>{c.w=clamp(Math.round(ow+(ev.clientX-sx)/scale()),8,maxW);c.h=clamp(Math.round(oh+(ev.clientY-sy)/scale()),8,maxH);const ds=displaySize(c);node.style.width=`${ds.w}px`;node.style.height=`${ds.h}px`;updateInspectorXYWH();renderLua();renderValidation()};const up=()=>{node.removeEventListener('pointermove',move);node.removeEventListener('pointerup',up);persist()};node.addEventListener('pointermove',move);node.addEventListener('pointerup',up)}
@@ -190,6 +202,8 @@ function fitCanvas(){const wrap=$('#canvasWrap'),view=activeView();if(!wrap||!vi
 if($('#fitCanvas'))$('#fitCanvas').onclick=fitCanvas;
 document.addEventListener('keydown',e=>{const c=selectedControl();if(!c||!['ArrowLeft','ArrowRight','ArrowUp','ArrowDown'].includes(e.key)||['INPUT','TEXTAREA','SELECT'].includes(document.activeElement?.tagName))return;e.preventDefault();const step=e.shiftKey?5:1,{w:W,h:H}=viewSize();if(e.key==='ArrowLeft')c.x=clamp(c.x-step,0,W);if(e.key==='ArrowRight')c.x=clamp(c.x+step,0,W);if(e.key==='ArrowUp')c.y=clamp(c.y-step,0,H);if(e.key==='ArrowDown')c.y=clamp(c.y+step,0,H);renderCanvas();renderInspector();renderLua();renderValidation();persist()});
 $('#copyGuiLua').onclick=()=>copyText(generateLua());$('#downloadGuiLua').onclick=()=>{const issues=validate(),err=issues.filter(x=>x.level==='error').length;if(err&&!confirm(`검사 오류가 ${err}개 있습니다. 그래도 저장할까요?`))return;download('PreScript.lua','\ufeff'+generateLua())};
+el.testButton.onclick=()=>{guiTestMode=!guiTestMode;el.testButton.textContent=guiTestMode?'편집으로 돌아가기':'동작 테스트';el.testButton.classList.toggle('primary',!guiTestMode);el.testButton.classList.toggle('soft',guiTestMode);el.testPanel.hidden=!guiTestMode;if(guiTestMode){state.selectedControlId=null;guiTestLog('시작',`${activeView()?.name||'화면'} · 실제 ImageMax 명령은 실행하지 않습니다.`)}renderCanvas();renderInspector();renderBehaviorSection()};
+$('#clearGuiTest').onclick=()=>{el.testLog.innerHTML='';guiTestSequence=0};
 function persist(){try{localStorage.setItem('imagemaxGuiProject',encodeProject({...state,selectedControlId:null}))}catch{}}
 $('#saveGuiProject').onclick=()=>download('imagemax_gui.imxgui.json',encodeProject({...state,selectedControlId:null}),'application/json');
 $('#loadGuiProject').addEventListener('change',async e=>{try{const p=await readJsonFile(e.target.files[0]);if(p.format!=='imagemax-web-gui')throw new Error('ImageMax GUI Builder 프로젝트가 아닙니다.');Object.assign(state,p,{selectedControlId:null});normalizeState();if(!activeView()){state.activeType='tab';state.activeId=state.tabs[0]?.id||null}if($('#zoomSelect')){$('#zoomSelect').value=String(state.scale);$('#zoomBadge').textContent=`${Math.round(state.scale*100)}%`;}renderAll();toast('GUI 프로젝트를 불러왔습니다.')}catch(err){alert(err.message)}e.target.value=''});

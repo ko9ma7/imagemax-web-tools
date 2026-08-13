@@ -49,7 +49,7 @@
     <section class="panel workspace">
       <div class="workbar">
         <div><b id="canvasTitle">사용자</b><div id="canvasMeta" class="hint">ImageMax GUI 좌표 360 × 320</div></div>
-        <div class="row wrap"><span id="zoomBadge" class="badge">100%</span><select id="zoomSelect" class="select zoom-select" title="편집 화면 배율"><option value=".75">75%</option><option value="1" selected>실제 크기 100%</option><option value="1.25">125%</option><option value="1.5">150%</option><option value="2">200%</option></select><button id="fitCanvas" class="btn small soft">화면 맞춤</button><button id="toggleGrid" class="btn small soft">편집선</button><button id="deleteControl" class="btn danger small" disabled>선택 삭제</button><button id="copyGuiLua" class="btn small">코드 복사</button></div>
+        <div class="row wrap"><span id="zoomBadge" class="badge">100%</span><select id="zoomSelect" class="select zoom-select" title="편집 화면 배율"><option value=".75">75%</option><option value="1" selected>실제 크기 100%</option><option value="1.25">125%</option><option value="1.5">150%</option><option value="2">200%</option></select><button id="fitCanvas" class="btn small soft">화면 맞춤</button><button id="toggleGrid" class="btn small soft">편집선</button><button id="toggleGuiTest" class="btn small primary" type="button">동작 테스트</button><button id="deleteControl" class="btn danger small" disabled>선택 삭제</button><button id="copyGuiLua" class="btn small">코드 복사</button></div>
       </div>
       <div id="canvasWrap" class="canvas-wrap imagemax-preview-wrap">
         <div id="runtimeStage" class="imagemax-stage">
@@ -64,6 +64,10 @@
           </div>
         </div>
       </div>
+      <aside id="guiTestPanel" class="gui-test-panel" hidden>
+        <div class="gui-test-head"><div><b>GUI 동작 테스트 로그</b><span>실제 ImageMax 호출 없이 값·콜백·노코드 규칙을 확인합니다.</span></div><button id="clearGuiTest" class="btn small" type="button">로그 지우기</button></div>
+        <div id="guiTestLog" class="gui-test-log" role="log" aria-live="polite"></div>
+      </aside>
     </section>
 
     <aside class="panel inspector-panel">
