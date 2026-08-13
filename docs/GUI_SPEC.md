@@ -200,6 +200,8 @@ EnableImage / GUIItemEnable / GUIItemUpdate
 
 `동작 테스트`는 편집 좌표를 변경하지 않는 별도 모드다.
 
+- 테스트 모드도 편집 모드와 같은 Win32풍 체크/라디오/콤보 지오메트리를 유지하며 브라우저 기본 폼 크기로 교체하지 않는다.
+- 테스트 로그는 사용자 GUI 영역 아래에 별도로 배치해 382×346 미리보기를 가리지 않는다.
 - Check/Radio 값은 0/1, Combo는 선택 인덱스, Edit는 문자열로 연결 변수에 반영한다.
 - Button/Check/Radio/Combo/Edit 이벤트마다 연결 콜백 이름과 컨트롤 ID를 로그에 표시한다.
 - 노코드 `EnableImage`, `GUIItemEnable`, `GUIItemShow`, `GUIItemUpdate`, `Print`, `MessageBox` 규칙을 브라우저 상태와 로그로 확인한다.
