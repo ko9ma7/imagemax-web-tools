@@ -3,9 +3,9 @@ import {$,$$,escLua,luaId,download,copyText,toast,uid,encodeProject,readJsonFile
 const TAB_W=360, TAB_H=320;
 // ImageMax 문서의 360/320은 X/Y 좌표 입력 범위입니다. 실제 사용자 GUI 클라이언트는
 // 컨트롤이 우측/하단으로 조금 더 표시될 수 있는 여백을 갖습니다.
-const TAB_RUNTIME_EXTRA_X=22, TAB_RUNTIME_EXTRA_Y=18, TAB_RUNTIME_INSET_X=10, TAB_RUNTIME_INSET_Y=6;
-const state={format:'imagemax-web-gui',version:5,tabs:[{id:uid('tab'),name:'사용자',iniSection:'',controls:[]}],dialogs:[],activeType:'tab',activeId:null,selectedControlId:null,xmlImages:[],xmlMeta:null,imported:{sourceName:'',preludeCode:'',postludeCode:'',encoding:'',parseWarnings:[]},showGrid:false,scale:1.25};
-const scale=()=>Number(state.scale)||1.25;
+const TAB_RUNTIME_EXTRA_X=22, TAB_RUNTIME_EXTRA_Y=18, TAB_RUNTIME_INSET_X=20, TAB_RUNTIME_INSET_Y=5;
+const state={format:'imagemax-web-gui',version:6,tabs:[{id:uid('tab'),name:'사용자',iniSection:'',controls:[]}],dialogs:[],activeType:'tab',activeId:null,selectedControlId:null,xmlImages:[],xmlMeta:null,imported:{sourceName:'',preludeCode:'',postludeCode:'',encoding:'',parseWarnings:[]},showGrid:false,scale:1};
+const scale=()=>Number(state.scale)||1;
 state.activeId=state.tabs[0].id;
 
 const el={list:$('#viewList'),canvas:$('#canvas'),title:$('#canvasTitle'),meta:$('#canvasMeta'),inspector:$('#inspector'),behavior:$('#behaviorSection'),badge:$('#selectedBadge'),lua:$('#guiLuaPreview'),del:$('#deleteControl'),modal:$('#viewModal'),validation:$('#validationList'),validationBadge:$('#validationBadge'),runtimeTabs:$('#runtimeTabs'),advanced:$('#advancedLua'),advancedWrap:$('#advancedLuaWrap'),importSummary:$('#importSummary'),behaviorModal:$('#behaviorModal'),stage:$('#runtimeStage'),runtimeWindow:$('#runtimeWindow')};
@@ -55,14 +55,14 @@ function actualSize(c){
 }
 function displaySize(c){
   const sz=actualSize(c);
-  return c.type==='group'?{w:sz.w+16,h:sz.h+12}:sz;
+  return c.type==='group'?{w:sz.w+16,h:sz.h+18}:sz;
 }
 function runtimeOuterSize(view=activeView()){
   const rt=runtimeMetrics(view);
-  return {w:rt.w+18,h:rt.h+66};
+  return state.activeType==='tab'?{w:420,h:489}:{w:rt.w+18,h:rt.h+66};
 }
 function normalizeState(){
-  const incomingVersion=Number(state.version)||0;state.version=5;state.xmlImages=state.xmlImages||[];state.scale=incomingVersion<4?1.25:(Number(state.scale)||1.25);state.imported=state.imported||{sourceName:'',preludeCode:'',postludeCode:'',encoding:'',parseWarnings:[]};state.imported.encoding=state.imported.encoding||'';state.imported.parseWarnings=state.imported.parseWarnings||[];state.showGrid=incomingVersion<5?false:state.showGrid!==false;
+  const incomingVersion=Number(state.version)||0;state.version=6;state.xmlImages=state.xmlImages||[];state.scale=incomingVersion<6?1:(Number(state.scale)||1);state.imported=state.imported||{sourceName:'',preludeCode:'',postludeCode:'',encoding:'',parseWarnings:[]};state.imported.encoding=state.imported.encoding||'';state.imported.parseWarnings=state.imported.parseWarnings||[];state.showGrid=incomingVersion<5?false:state.showGrid!==false;
   for(const v of [...(state.tabs||[]),...(state.dialogs||[])])for(const c of v.controls||[]){c.itemVar=c.itemVar||'';c.behaviors=c.behaviors||[];if(c.type==='radio')c.radioGroup=c.radioGroup||'';}
 }
 
@@ -80,10 +80,12 @@ function renderCanvas(){
   el.canvas.style.setProperty('--grid-x',`${rt.insetX}px`);
   el.canvas.style.setProperty('--grid-y',`${rt.insetY}px`);
   el.canvas.classList.toggle('no-grid',!state.showGrid);
-  el.runtimeWindow.style.width=`${outer.w}px`;el.runtimeWindow.style.transform=`scale(${sc})`;
+  el.runtimeWindow.classList.toggle('main-preview',state.activeType==='tab');
+  el.runtimeWindow.classList.toggle('dialog-preview',state.activeType==='dialog');
+  el.runtimeWindow.style.width=`${outer.w}px`;el.runtimeWindow.style.height=`${outer.h}px`;el.runtimeWindow.style.transform=`scale(${sc})`;
   el.stage.style.width=`${outer.w*sc}px`;el.stage.style.height=`${outer.h*sc}px`;
   el.title.textContent=view.name;
-  el.meta.textContent=state.activeType==='tab'?`ImageMax X/Y 360 × 320 · 원본 좌표 1:1 렌더 후 전체 확대 ${Math.round(sc*100)}%`:`ImageMax Dialog ${W} × ${H} · parent_id 방식`;
+  el.meta.textContent=state.activeType==='tab'?`ImageMax 2.67 실측 420 × 489 · Lua 좌표 360 × 320 · ${Math.round(sc*100)}%`:`ImageMax Dialog ${W} × ${H} · parent_id 방식`;
   const boundary=state.activeType==='tab'?`<i class="coord-boundary" style="width:${W}px;height:${H}px"></i>`:'';
   el.canvas.innerHTML=boundary+view.controls.map(controlHtml).join('');$$('.ctrl',el.canvas).forEach(bindControl);el.del.disabled=!selectedControl();
 }
@@ -96,7 +98,8 @@ function controlHtml(c){const cls=`ctrl ${c.type} ${c.id===state.selectedControl
   else if(c.type==='picture')inner=`<span>🖼 ${html(c.path||'image.png')}</span>`;
   else if(c.type==='link')inner=`<span class="link-value">${html(c.text||'링크')}</span>`;
   else inner=`<span>${html(c.text||c.type)}</span>`;
-  return `<div class="${cls}" data-id="${c.id}" title="${html(c.itemVar||c.var||c.func||c.type)}" style="left:${c.x+rt.insetX}px;top:${c.y+rt.insetY}px;width:${sz.w}px;height:${sz.h}px;z-index:${c.z||1}">${inner}<i class="handle"></i></div>`}
+  const nativeOffset=c.type==='group'?'transform:translate(-9px,-11px);':'';
+  return `<div class="${cls}" data-id="${c.id}" title="${html(c.itemVar||c.var||c.func||c.type)}" style="left:${c.x+rt.insetX}px;top:${c.y+rt.insetY}px;width:${sz.w}px;height:${sz.h}px;${nativeOffset}z-index:${c.z||1}">${inner}<i class="handle"></i></div>`}
 function bindControl(node){node.addEventListener('pointerdown',e=>{e.preventDefault();state.selectedControlId=node.dataset.id;renderInspector();renderBehaviorSection();$$('.ctrl',el.canvas).forEach(n=>n.classList.toggle('selected',n.dataset.id===state.selectedControlId));el.del.disabled=false;if(e.target.classList.contains('handle'))startResize(e,node);else startDrag(e,node)})}
 function startDrag(e,node){const c=selectedControl(),sx=e.clientX,sy=e.clientY,ox=c.x,oy=c.y,{w:W,h:H}=viewSize(),rt=runtimeMetrics();node.setPointerCapture(e.pointerId);const move=ev=>{c.x=clamp(Math.round(ox+(ev.clientX-sx)/scale()),0,W);c.y=clamp(Math.round(oy+(ev.clientY-sy)/scale()),0,H);node.style.left=`${c.x+rt.insetX}px`;node.style.top=`${c.y+rt.insetY}px`;updateInspectorXYWH();renderLua();renderValidation()};const up=()=>{node.removeEventListener('pointermove',move);node.removeEventListener('pointerup',up);persist()};node.addEventListener('pointermove',move);node.addEventListener('pointerup',up)}
 function startResize(e,node){e.stopPropagation();const c=selectedControl(),sx=e.clientX,sy=e.clientY,sz=actualSize(c),ow=sz.w,oh=sz.h,{w:W,h:H}=viewSize(),rt=runtimeMetrics();node.setPointerCapture(e.pointerId);if(c.w===-1)c.w=ow;if(c.h===-1)c.h=oh;const maxW=state.activeType==='tab'?Math.max(8,rt.w-rt.insetX-c.x):Math.max(8,W-c.x),maxH=state.activeType==='tab'?Math.max(8,rt.h-rt.insetY-c.y):Math.max(8,H-c.y);const move=ev=>{c.w=clamp(Math.round(ow+(ev.clientX-sx)/scale()),8,maxW);c.h=clamp(Math.round(oh+(ev.clientY-sy)/scale()),8,maxH);const ds=displaySize(c);node.style.width=`${ds.w}px`;node.style.height=`${ds.h}px`;updateInspectorXYWH();renderLua();renderValidation()};const up=()=>{node.removeEventListener('pointermove',move);node.removeEventListener('pointerup',up);persist()};node.addEventListener('pointermove',move);node.addEventListener('pointerup',up)}
@@ -182,15 +185,15 @@ $('#importPreScript').addEventListener('change',async e=>{const f=e.target.files
 $('#importGuiXml').addEventListener('change',async e=>{const f=e.target.files[0];if(!f)return;try{const n=await importXml(f);toast(`${n}개 ImageMax 이미지를 연결했습니다.`);renderAll()}catch(err){alert(err.message)}e.target.value=''})
 function renderImportSummary(){const a=state.imported?.sourceName?`GUI: ${state.imported.sourceName}${state.imported.encoding?' · '+state.imported.encoding:''}`:'GUI: 새 작업';let b='XML: 연결 안 됨';if(state.xmlMeta){b=`XML: ${state.xmlMeta.name} · 이미지 ${state.xmlMeta.count}개`;if(state.xmlMeta.xmlVersion)b+=` · v${state.xmlMeta.xmlVersion}`;if(state.xmlMeta.targetName)b+=` · ${state.xmlMeta.targetName}`}el.importSummary.innerHTML=`<b>${html(a)}</b><br>${html(b)}${state.imported?.sourceName?'<br><span>한글·탭 이름·컨트롤 텍스트를 원본 인코딩으로 해석했습니다.</span>':''}${state.imported?.parseWarnings?.length?`<br><span class="warn-text">미해석 GUI 구문 ${state.imported.parseWarnings.length}개 · 고급 Lua에서 확인</span>`:''}`}
 
-const zoomSelect=$('#zoomSelect');if(zoomSelect){zoomSelect.value=String(state.scale);zoomSelect.onchange=()=>{state.scale=Number(zoomSelect.value)||1.25;$('#zoomBadge').textContent=`${Math.round(state.scale*100)}%`;renderCanvas();persist()};$('#zoomBadge').textContent=`${Math.round(state.scale*100)}%`;}
-function fitCanvas(){const wrap=$('#canvasWrap'),view=activeView();if(!wrap||!view)return;const outer=runtimeOuterSize(view);const availW=Math.max(260,wrap.clientWidth-56),availH=Math.max(260,wrap.clientHeight-56);const next=Math.max(.75,Math.min(1.5,availW/outer.w,availH/outer.h));state.scale=Math.round(next*20)/20;if($('#zoomSelect')){const opts=[.75,1,1.25,1.5,2];const closest=opts.reduce((a,b)=>Math.abs(b-state.scale)<Math.abs(a-state.scale)?b:a);$('#zoomSelect').value=String(closest)}$('#zoomBadge').textContent=`${Math.round(state.scale*100)}%`;renderCanvas();persist()}
+const zoomSelect=$('#zoomSelect');if(zoomSelect){zoomSelect.value=String(state.scale);zoomSelect.onchange=()=>{state.scale=Number(zoomSelect.value)||1;$('#zoomBadge').textContent=`${Math.round(state.scale*100)}%`;renderCanvas();persist()};$('#zoomBadge').textContent=`${Math.round(state.scale*100)}%`;}
+function fitCanvas(){const wrap=$('#canvasWrap'),view=activeView();if(!wrap||!view)return;const outer=runtimeOuterSize(view);const availW=Math.max(260,wrap.clientWidth-56),availH=Math.max(260,wrap.clientHeight-56);const next=Math.max(.75,Math.min(1,availW/outer.w,availH/outer.h));state.scale=Math.round(next*20)/20;if($('#zoomSelect')){const opts=[.75,1,1.25,1.5,2];const closest=opts.reduce((a,b)=>Math.abs(b-state.scale)<Math.abs(a-state.scale)?b:a);$('#zoomSelect').value=String(closest)}$('#zoomBadge').textContent=`${Math.round(state.scale*100)}%`;renderCanvas();persist()}
 if($('#fitCanvas'))$('#fitCanvas').onclick=fitCanvas;
 document.addEventListener('keydown',e=>{const c=selectedControl();if(!c||!['ArrowLeft','ArrowRight','ArrowUp','ArrowDown'].includes(e.key)||['INPUT','TEXTAREA','SELECT'].includes(document.activeElement?.tagName))return;e.preventDefault();const step=e.shiftKey?5:1,{w:W,h:H}=viewSize();if(e.key==='ArrowLeft')c.x=clamp(c.x-step,0,W);if(e.key==='ArrowRight')c.x=clamp(c.x+step,0,W);if(e.key==='ArrowUp')c.y=clamp(c.y-step,0,H);if(e.key==='ArrowDown')c.y=clamp(c.y+step,0,H);renderCanvas();renderInspector();renderLua();renderValidation();persist()});
 $('#copyGuiLua').onclick=()=>copyText(generateLua());$('#downloadGuiLua').onclick=()=>{const issues=validate(),err=issues.filter(x=>x.level==='error').length;if(err&&!confirm(`검사 오류가 ${err}개 있습니다. 그래도 저장할까요?`))return;download('PreScript.lua','\ufeff'+generateLua())};
 function persist(){try{localStorage.setItem('imagemaxGuiProject',encodeProject({...state,selectedControlId:null}))}catch{}}
 $('#saveGuiProject').onclick=()=>download('imagemax_gui.imxgui.json',encodeProject({...state,selectedControlId:null}),'application/json');
 $('#loadGuiProject').addEventListener('change',async e=>{try{const p=await readJsonFile(e.target.files[0]);if(p.format!=='imagemax-web-gui')throw new Error('ImageMax GUI Builder 프로젝트가 아닙니다.');Object.assign(state,p,{selectedControlId:null});normalizeState();if(!activeView()){state.activeType='tab';state.activeId=state.tabs[0]?.id||null}if($('#zoomSelect')){$('#zoomSelect').value=String(state.scale);$('#zoomBadge').textContent=`${Math.round(state.scale*100)}%`;}renderAll();toast('GUI 프로젝트를 불러왔습니다.')}catch(err){alert(err.message)}e.target.value=''});
-$('#newGui').onclick=()=>{if(!confirm('GUI 작업을 초기화할까요?'))return;state.tabs=[{id:uid('tab'),name:'사용자',iniSection:'',controls:[]}];state.dialogs=[];state.activeType='tab';state.activeId=state.tabs[0].id;state.selectedControlId=null;state.xmlImages=[];state.xmlMeta=null;state.imported={sourceName:'',preludeCode:'',postludeCode:'',encoding:'',parseWarnings:[]};state.scale=1.25;state.showGrid=false;if($('#zoomSelect'))$('#zoomSelect').value='1.25';renderAll()};
+$('#newGui').onclick=()=>{if(!confirm('GUI 작업을 초기화할까요?'))return;state.tabs=[{id:uid('tab'),name:'사용자',iniSection:'',controls:[]}];state.dialogs=[];state.activeType='tab';state.activeId=state.tabs[0].id;state.selectedControlId=null;state.xmlImages=[];state.xmlMeta=null;state.imported={sourceName:'',preludeCode:'',postludeCode:'',encoding:'',parseWarnings:[]};state.scale=1;state.showGrid=false;if($('#zoomSelect'))$('#zoomSelect').value='1';renderAll()};
 
 try{const p=JSON.parse(localStorage.getItem('imagemaxGuiProject')||'null');if(p?.format==='imagemax-web-gui'){Object.assign(state,p,{selectedControlId:null});normalizeState()}}catch{}
 if($('#zoomSelect')){$('#zoomSelect').value=String(state.scale);$('#zoomBadge').textContent=`${Math.round(state.scale*100)}%`;}
