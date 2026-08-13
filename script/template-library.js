@@ -180,30 +180,34 @@ export function buildBuiltinTemplates(ctx){
   return T;
 }
 
-export function validateTemplatePack(pack){
+export function validateTemplatePack(pack,options={}){
   const allowedKinds=new Set(['conditional','counter','retry','elapsed','once','cooldown','randomFound','bestMatch']);
   const allowedConditions=new Set(['current','found','notfound','enabled','disabled','variable','multi','pixel','clipboard','ini','windowFound','windowNotFound','targetWidth','targetHeight','stopped','paused']);
   const allowedActions=new Set(['currentClick','click','forceClick','enable','goto','key','mouse','drag','setVar','addVar','subVar','toggleVar','clipboardSet','sleep','openScript','stop','sound','screenshot','screenshotNamed','print','printVar','telegram','telegramShot','discord','discordShot','kakao','passAct','passAll','fail']);
   const allowedCategories=new Set(Object.keys(CATEGORY_LABELS));
   const assert=(ok,msg)=>{if(!ok)throw new Error(msg)};
-  const actions=(arr,where)=>{assert(Array.isArray(arr),`${where}: 행동 배열 형식이 잘못되었습니다.`);assert(arr.length<=30,`${where}: 행동은 최대 30개입니다.`);for(const [i,a] of arr.entries()){assert(a&&typeof a==='object',`${where}[${i}]: 행동 객체가 필요합니다.`);assert(allowedActions.has(a.type),`${where}[${i}]: 지원하지 않는 행동 '${a.type}' 입니다.`);assert(a.params==null||(typeof a.params==='object'&&!Array.isArray(a.params)),`${where}[${i}]: params 형식이 잘못되었습니다.`)}};
-  const rule=(r,where)=>{assert(r&&typeof r==='object',`${where}: 규칙 객체가 필요합니다.`);assert(allowedKinds.has(r.kind),`${where}: 지원하지 않는 규칙 '${r.kind}' 입니다.`);if(r.kind==='conditional'){assert(r.condition&&allowedConditions.has(r.condition.type),`${where}: 지원하지 않는 조건입니다.`);actions(r.then||[],`${where}.then`);actions(r.else||[],`${where}.else`)}else if(r.kind==='retry'){assert(String(r.image||'').length<=200,`${where}: 이미지명이 너무 깁니다.`);actions(r.foundActions||[],`${where}.foundActions`);actions(r.exhaustedActions||[],`${where}.exhaustedActions`)}else if(['counter','elapsed','once','cooldown'].includes(r.kind)){actions(r.actions||[],`${where}.actions`)}else if(['randomFound','bestMatch'].includes(r.kind)){assert(Array.isArray(r.images)&&r.images.length<=20,`${where}: 후보 이미지는 최대 20개입니다.`)}};
+  const bytes=value=>new TextEncoder().encode(JSON.stringify(value)).byteLength;
+  const string=(value,where,max,required=false)=>{assert(value==null||typeof value==='string',`${where}: 문자열이 필요합니다.`);const text=String(value??'');assert(!required||text.trim().length>0,`${where}: 값이 비어 있습니다.`);assert(text.length<=max,`${where}: 최대 ${max}자입니다.`);return text};
+  const actions=(arr,where)=>{assert(Array.isArray(arr),`${where}: 행동 배열 형식이 잘못되었습니다.`);assert(arr.length<=30,`${where}: 행동은 최대 30개입니다.`);for(const [i,a] of arr.entries()){assert(a&&typeof a==='object'&&!Array.isArray(a),`${where}[${i}]: 행동 객체가 필요합니다.`);assert(allowedActions.has(a.type),`${where}[${i}]: 지원하지 않는 행동 '${a.type}' 입니다.`);assert(a.params==null||(typeof a.params==='object'&&!Array.isArray(a.params)),`${where}[${i}]: params 형식이 잘못되었습니다.`);for(const [key,value] of Object.entries(a.params||{})){string(key,`${where}[${i}] params key`,80,true);if(typeof value==='string')string(value,`${where}[${i}].${key}`,1500);else assert(value==null||typeof value==='number'||typeof value==='boolean',`${where}[${i}].${key}: 문자열·숫자·논리값만 사용할 수 있습니다.`)}}};
+  const rule=(r,where)=>{assert(r&&typeof r==='object'&&!Array.isArray(r),`${where}: 규칙 객체가 필요합니다.`);assert(allowedKinds.has(r.kind),`${where}: 지원하지 않는 규칙 '${r.kind}' 입니다.`);if(r.kind==='conditional'){assert(r.condition&&allowedConditions.has(r.condition.type),`${where}: 지원하지 않는 조건입니다.`);actions(r.then||[],`${where}.then`);actions(r.else||[],`${where}.else`)}else if(r.kind==='retry'){string(r.image||'',`${where}.image`,200);actions(r.foundActions||[],`${where}.foundActions`);actions(r.exhaustedActions||[],`${where}.exhaustedActions`)}else if(['counter','elapsed','once','cooldown'].includes(r.kind)){actions(r.actions||[],`${where}.actions`)}else if(['randomFound','bestMatch'].includes(r.kind)){assert(Array.isArray(r.images)&&r.images.length<=20,`${where}: 후보 이미지는 최대 20개입니다.`);r.images.forEach((name,i)=>string(name,`${where}.images[${i}]`,200))}};
+  const maxTemplates=Math.max(1,Number(options.maxTemplates)||50),maxPackBytes=Math.max(0,Number(options.maxPackBytes)||0);
   assert(pack&&typeof pack==='object','템플릿 데이터가 객체가 아닙니다.');
   assert(pack.format===TEMPLATE_FORMAT,`format은 '${TEMPLATE_FORMAT}' 이어야 합니다.`);
   assert(Number(pack.version)===TEMPLATE_VERSION,`지원하지 않는 템플릿 버전입니다: ${pack.version}`);
+  string(pack.name||'','name',120);string(pack.description||'','description',1000);string(pack.author||'','author',80);
   assert(Array.isArray(pack.templates)&&pack.templates.length,'templates 배열이 비어 있습니다.');
-  assert(pack.templates.length<=50,'로컬 템플릿 팩에는 최대 50개 템플릿만 넣을 수 있습니다. 공유 제출은 최대 20개입니다.');
+  assert(pack.templates.length<=maxTemplates,`템플릿은 최대 ${maxTemplates}개입니다.`);
+  if(maxPackBytes)assert(bytes(pack)<=maxPackBytes,`템플릿 팩은 최대 ${maxPackBytes}바이트입니다.`);
   const seen=new Set();
   for(const [i,t] of pack.templates.entries()){
-    assert(t&&typeof t==='object',`${i+1}번째 템플릿 형식이 잘못되었습니다.`);
+    assert(t&&typeof t==='object'&&!Array.isArray(t),`${i+1}번째 템플릿 형식이 잘못되었습니다.`);
     assert(String(t.id||'').match(/^[a-z0-9][a-z0-9_-]{2,79}$/),`${i+1}번째 템플릿 id가 잘못되었습니다.`);
     assert(!seen.has(t.id),`${t.id}: 같은 id가 팩 안에 중복되어 있습니다.`);seen.add(t.id);
-    assert(String(t.title||'').trim()&&String(t.title).length<=100,`${t.id}: title은 1~100자여야 합니다.`);
-    assert(String(t.desc||'').length<=1000,`${t.id}: description은 최대 1000자입니다.`);
+    string(t.title,`${t.id}.title`,100,true);string(t.desc||'',`${t.id}.description`,1000);string(t.tag||'',`${t.id}.tag`,80);string(t.author||'',`${t.id}.author`,80);
     assert(allowedCategories.has(t.category||'custom'),`${t.id}: 지원하지 않는 category 입니다.`);
     assert(Array.isArray(t.rules)&&t.rules.length&&t.rules.length<=30,`${t.id}: rules는 1~30개여야 합니다.`);
     t.rules.forEach((r,j)=>rule(r,`${t.id}.rules[${j}]`));
-    assert(JSON.stringify(t).length<=30000,`${t.id}: 템플릿 크기가 너무 큽니다.`);
+    assert(bytes(t)<=30000,`${t.id}: 템플릿은 최대 30000바이트입니다.`);
   }
   return pack;
 }

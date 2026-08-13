@@ -327,7 +327,8 @@ els.templateFile.addEventListener('change',async e=>{try{if(e.target.files[0])aw
 els.importTemplate.onclick=()=>els.templateFile.click();
 
 function buildSubmissionBody(pack){const json=JSON.stringify(pack,null,2);return `<!-- IMAGEMAX_TEMPLATE_SUBMISSION -->\nImageMax Web Tools에서 제출한 공유 템플릿입니다.\n\n<!-- IMAGEMAX_TEMPLATE_JSON_START -->\n\`\`\`json\n${json}\n\`\`\`\n<!-- IMAGEMAX_TEMPLATE_JSON_END -->\n`}
-async function submitPack(pack){validateTemplatePack(pack);if(pack.templates.length>20)throw new Error('공유 신청은 한 번에 최대 20개 템플릿까지 가능합니다. 팩을 나누어 제출하세요.');const endpoint=window.IMAGEMAX_SHARE_ENDPOINT||'';if(endpoint){const res=await fetch(endpoint,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(pack)});const data=await res.json().catch(()=>({}));if(!res.ok)throw new Error(data.error||`공유 API 오류 ${res.status}`);toast('공유 제출이 접수되었습니다.');if(data.url)window.open(data.url,'_blank','noopener');return}
+async function directSubmissionBody(pack){const provider=window.IMAGEMAX_GET_TURNSTILE_TOKEN,turnstileToken=typeof provider==='function'?await provider():window.IMAGEMAX_TURNSTILE_TOKEN;if(!turnstileToken)throw new Error('직접 제출 모드에 Cloudflare Turnstile 토큰 공급자가 설정되지 않았습니다. 기본 GitHub Issue 모드를 사용하거나 공유 설정을 확인하세요.');return {pack,turnstileToken}}
+async function submitPack(pack){validateTemplatePack(pack,{maxTemplates:20,maxPackBytes:60000});const endpoint=window.IMAGEMAX_SHARE_ENDPOINT||'';if(endpoint){const res=await fetch(endpoint,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(await directSubmissionBody(pack))});const data=await res.json().catch(()=>({}));if(!res.ok)throw new Error(data.error||`공유 API 오류 ${res.status}`);toast('공유 제출이 접수되었습니다.');if(data.url)window.open(data.url,'_blank','noopener');return}
   const body=buildSubmissionBody(pack);if(body.length>50000)throw new Error('GitHub Issue 제출 방식의 안전 크기를 넘었습니다. 템플릿을 나눠 제출하거나 서버리스 직접 제출을 설정하세요.');
   const title=`[Template] ${pack.templates[0]?.title||pack.name||'ImageMax template'}`;const encodedBody=encodeURIComponent(body);
   if(encodedBody.length<=6000){const url=`https://github.com/${SHARE_REPO}/issues/new?title=${encodeURIComponent(title)}&body=${encodedBody}`;window.open(url,'_blank','noopener');toast('GitHub 제출 화면을 열었습니다. Issue를 등록하면 Action이 검증합니다.');return}
@@ -337,8 +338,9 @@ function shareCustomTemplate(id){const t=state.customTemplates.find(x=>x.id===id
 els.shareUpload.onclick=()=>els.shareFile.click();
 els.shareFile.addEventListener('change',async e=>{try{if(!e.target.files[0])return;const p=validateTemplatePack(await readJsonFile(e.target.files[0]));await submitPack(p)}catch(err){alert(err.message)}e.target.value=''});
 
-async function loadCommunityIndex(){try{const r=await fetch('../community/index.json',{cache:'no-store'});if(!r.ok)throw new Error();const data=await r.json();state.communityTemplates=(data.templates||[]).map(x=>({...x,builtin:false,community:true}));if(els.communityStatus)els.communityStatus.textContent=`공유 템플릿 ${state.communityTemplates.length}개`;renderTemplates()}catch{if(els.communityStatus)els.communityStatus.textContent='공유 목록을 불러오지 못했습니다.'}}
-async function fetchCommunityPack(meta){const path=meta.path||`community/templates/${meta.id}.json`;const r=await fetch(`../${path.replace(/^\.\//,'')}`,{cache:'no-store'});if(!r.ok)throw new Error('공유 템플릿 파일을 읽지 못했습니다.');return validateTemplatePack(await r.json())}
+const embeddedCommunity=window.IMAGEMAX_COMMUNITY_DATA||{index:{templates:[]},packs:{}};
+async function loadCommunityIndex(){let data=embeddedCommunity.index||{templates:[]},source='로컬';if(location.protocol!=='file:'){try{const r=await fetch('../community/index.json',{cache:'no-store'});if(r.ok){data=await r.json();source='온라인'}}catch{}}state.communityTemplates=(data.templates||[]).map(x=>({...x,builtin:false,community:true}));if(els.communityStatus)els.communityStatus.textContent=`공유 템플릿 ${state.communityTemplates.length}개 · ${source} 목록`;renderTemplates()}
+async function fetchCommunityPack(meta){const embedded=embeddedCommunity.packs?.[meta.id];if(location.protocol==='file:'&&embedded)return validateTemplatePack(clone(embedded));const path=meta.path||`community/templates/${meta.id}.json`;try{const r=await fetch(`../${path.replace(/^\.\//,'')}`,{cache:'no-store'});if(r.ok)return validateTemplatePack(await r.json())}catch{}if(embedded)return validateTemplatePack(clone(embedded));throw new Error('공유 템플릿 파일을 읽지 못했습니다.')}
 async function applyCommunityTemplate(id){try{const meta=state.communityTemplates.find(x=>x.id===id);if(!meta)return;const pack=await fetchCommunityPack(meta),t=pack.templates.find(x=>x.id===id)||pack.templates[0];state.scripts[state.selected].push(...clone(t.rules));renderSelection();persist();toast(`'${t.title}' 공유 템플릿을 적용했습니다.`)}catch(e){alert(e.message)}}
 async function downloadCommunityTemplate(id){try{const meta=state.communityTemplates.find(x=>x.id===id);const pack=await fetchCommunityPack(meta);download(`${sanitizeId(meta.title||id)}.imxtpl.json`,JSON.stringify(pack,null,2),'application/json')}catch(e){alert(e.message)}}
 
@@ -362,11 +364,11 @@ try{
   if(p?.format==='imagemax-web-script'){Object.assign(state,{xmlName:p.xmlName||'',images:p.images||[],scripts:p.scripts||{},selected:p.selected||null});normalizeRules();els.search.disabled=!state.images.length}
   state.customTemplates=JSON.parse(localStorage.getItem('imagemaxCustomTemplates')||'[]')||[];
   state.favorites=new Set(JSON.parse(localStorage.getItem('imagemaxTemplateFavorites')||'[]')||[]);state.favoriteOnly=localStorage.getItem('imagemaxTemplateFavoriteOnly')==='1';els.favoriteOnly.classList.toggle('active',state.favoriteOnly);els.favoriteOnly.textContent=state.favoriteOnly?'★':'☆';els.favoriteOnly.title=state.favoriteOnly?'즐겨찾기만 표시 중':'별표한 템플릿만 보기';
-  const pendingRaw=localStorage.getItem('imagemaxPendingTemplateImport');
+  const hashMatch=location.hash.match(/^#importTemplate=(.+)$/);const pendingRaw=hashMatch?decodeURIComponent(hashMatch[1]):localStorage.getItem('imagemaxPendingTemplateImport');
   if(pendingRaw){
     const pending=validateTemplatePack(JSON.parse(pendingRaw));
     for(const raw of pending.templates){const t=safeTemplateForStore(raw);const idx=state.customTemplates.findIndex(x=>x.id===t.id);if(idx>=0)state.customTemplates[idx]=t;else state.customTemplates.unshift(t)}
-    localStorage.removeItem('imagemaxPendingTemplateImport');state.templateMode='mine';
+    localStorage.removeItem('imagemaxPendingTemplateImport');if(hashMatch)history.replaceState(null,'',location.pathname+location.search);state.templateMode='mine';
     $$('[data-template-mode]').forEach(x=>x.classList.toggle('active',x.dataset.templateMode==='mine'));
     toast(`${pending.templates.length}개 공유 템플릿을 내 템플릿으로 가져왔습니다.`);
   }

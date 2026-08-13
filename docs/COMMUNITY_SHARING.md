@@ -18,6 +18,7 @@ GitHub Action
   ↓ 2차 엄격 검증
 community/templates/<id>.json 생성
 community/index.json 갱신
+community/index.js 오프라인 사본 갱신
   ↓
 제출 전용 branch + PR
   ↓ 관리자 검토/Merge
@@ -41,26 +42,30 @@ GitHub Pages 배포
 `optional-worker/worker.js`를 Cloudflare Worker 등에 배포하면 사용자는 GitHub Issue 화면으로 이동하지 않아도 됩니다.
 
 ```text
-페이지의 "공유 신청"
-  ↓ POST JSON
+페이지의 "공유 신청" + Turnstile 확인
+  ↓ 검증 토큰과 JSON POST
 Serverless Worker
-  ↓ GitHub Issues API
+  ↓ Origin + Turnstile 검증
+GitHub Issues API
 GitHub Issue 자동 생성
   ↓
 기존 GitHub Action → 검증 → PR → Merge
 ```
 
-Worker의 GitHub credential은 **대상 저장소 1곳 + Issues write만** 허용하는 최소 권한 credential로 제한합니다. Worker는 repository contents를 직접 수정하지 않습니다. 저장소 변경 권한은 GitHub 내부에서 실행되는 Action의 `GITHUB_TOKEN`에만 둡니다.
+Worker의 GitHub credential은 **대상 저장소 1곳 + Issues write만** 허용하는 최소 권한 credential로 제한합니다. Worker는 Origin 없는 요청을 거부하고 Cloudflare Turnstile 검증을 통과한 요청만 중계합니다. repository contents는 직접 수정하지 않으며 저장소 변경 권한은 GitHub 내부에서 실행되는 Action의 `GITHUB_TOKEN`에만 둡니다.
 
 ### 설정
 1. `optional-worker/worker.js` 배포
 2. Worker secret `GITHUB_TOKEN` 설정
-3. `GITHUB_REPO=ko9ma7/imagemax-web-tools`
-4. `ALLOWED_ORIGIN=https://ko9ma7.github.io`
-5. `assets/share-config.js`에 Worker URL 지정
+3. Worker secret `TURNSTILE_SECRET_KEY` 설정
+4. `GITHUB_REPO=ko9ma7/imagemax-web-tools`
+5. `ALLOWED_ORIGIN=https://ko9ma7.github.io`
+6. Pages에 Turnstile 위젯을 연결하고 `IMAGEMAX_GET_TURNSTILE_TOKEN` 함수 제공
+7. `assets/share-config.js`에 Worker URL 지정
 
 ```js
 window.IMAGEMAX_SHARE_ENDPOINT = 'https://your-worker.example.workers.dev';
+window.IMAGEMAX_GET_TURNSTILE_TOKEN = async () => turnstile.getResponse(widgetId);
 ```
 
 ## 왜 Worker가 repository_dispatch를 바로 호출하지 않나요?

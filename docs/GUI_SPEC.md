@@ -202,6 +202,8 @@ EnableImage / GUIItemEnable / GUIItemUpdate
 
 - 테스트 모드도 편집 모드와 같은 Win32풍 체크/라디오/콤보 지오메트리를 유지하며 브라우저 기본 폼 크기로 교체하지 않는다.
 - 테스트 로그는 사용자 GUI 영역 아래에 별도로 배치해 382×346 미리보기를 가리지 않는다.
+- 생성 Lua에는 `IMAGEMAX_GUI_PROJECT_V1` 주석 메타데이터를 함께 저장한다. 웹 빌더가 만든 Lua를 다시 불러와도 컨트롤 ID, 원래 콜백명, 라디오 그룹, 노코드 규칙을 복원하며 ImageMax는 이 주석을 무시한다.
+- 같은 기존 콜백명을 여러 컨트롤이 공유하면서 각기 다른 노코드 규칙을 가질 때는 컨트롤별 래퍼 함수를 생성한다. 래퍼는 `item_id`를 기존 콜백으로 전달한 뒤 해당 컨트롤의 규칙만 실행한다.
 - Check/Radio 값은 0/1, Combo는 선택 인덱스, Edit는 문자열로 연결 변수에 반영한다.
 - Button/Check/Radio/Combo/Edit 이벤트마다 연결 콜백 이름과 컨트롤 ID를 로그에 표시한다.
 - 노코드 `EnableImage`, `GUIItemEnable`, `GUIItemShow`, `GUIItemUpdate`, `Print`, `MessageBox` 규칙을 브라우저 상태와 로그로 확인한다.

@@ -8,3 +8,5 @@ ALLOWED_ORIGIN = "https://ko9ma7.github.io"
 
 # Store GITHUB_TOKEN as a secret, never here:
 # npx wrangler secret put GITHUB_TOKEN
+# Store the Cloudflare Turnstile secret too:
+# npx wrangler secret put TURNSTILE_SECRET_KEY

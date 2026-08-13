@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="ko">
-<head><meta charset="utf-8"><title>ImageMax Web Tools Browser Smoke Test</title></head>
+<head><meta charset="utf-8"><title>ImageMax Web Tools Browser Smoke Test</title><link rel="icon" href="data:,"></head>
 <body><pre id="result">RUNNING</pre><iframe id="app" style="width:1550px;height:900px"></iframe>
 <script type="module">
 const output=document.querySelector('#result'),frame=document.querySelector('#app'),checks=[];
@@ -9,29 +9,90 @@ const assert=(name,condition,detail='')=>checks.push({name,pass:!!condition,deta
 async function load(path){frame.src=path;await new Promise((resolve,reject)=>{const timer=setTimeout(()=>reject(new Error(`${path} load timeout`)),8000);frame.onload=()=>{clearTimeout(timer);resolve()}});await wait(250);return frame.contentDocument}
 try{
   localStorage.clear();
-  localStorage.setItem('imagemaxGuiProject',JSON.stringify({format:'imagemax-web-gui',version:7,tabs:[{id:'tab_test',name:'테스트',iniSection:'',controls:[{id:'check_test',type:'check',x:0,y:46,w:-1,h:-1,text:'히마리',func:'onHimari',var:'check_Himari',itemVar:'check_Cri1',behaviors:[{id:'beh_test',condition:'eq',compare:'1',action:'print',text:'히마리 선택'}]},{id:'radio_test',type:'radio',x:0,y:73,w:-1,h:-1,text:'선택',func:'onRadio',var:'radio1',radioGroup:'students',itemVar:'radio_Cri1',behaviors:[]},{id:'combo_test',type:'combo',x:220,y:20,w:80,h:-1,text:'',func:'onCombo',var:'combo1',items:['상시','학생선택'],itemVar:'combo_Cri1',behaviors:[]},{id:'edit_test',type:'edit',x:130,y:20,w:65,h:-1,text:'센세',func:'',var:'edit1',itemVar:'edit_Cri1',behaviors:[]}]}],dialogs:[],activeType:'tab',activeId:'tab_test',selectedControlId:null,xmlImages:[],xmlMeta:null,imported:{sourceName:'',preludeCode:'',postludeCode:'',encoding:'',parseWarnings:[]},showGrid:false,scale:1}));
-  const gui=await load('../gui/'),win=gui.querySelector('#runtimeWindow'),canvas=gui.querySelector('#canvas'),control=gui.querySelector('[data-id="check_test"]'),comboControl=gui.querySelector('[data-id="combo_test"]'),title=gui.querySelector('.imagemax-titlebar');
+  const guiProject={format:'imagemax-web-gui',version:7,tabs:[
+    {id:'tab_test',name:'테스트',iniSection:'',controls:[
+      {id:'check_test',type:'check',x:0,y:46,w:-1,h:-1,text:'히마리',func:'onHimari',var:'check_Himari',itemVar:'check_Cri1',behaviors:[{id:'beh_true',condition:'eq',compare:'1',action:'print',text:'히마리 선택'},{id:'beh_false',condition:'eq',compare:'0',action:'print',text:'실행되면 안 됨'}]},
+      {id:'radio_test_0',type:'radio',x:0,y:73,w:-1,h:-1,text:'첫째',func:'onRadio',var:'radio1',radioGroup:'students',itemVar:'radio_Cri0',behaviors:[]},
+      {id:'radio_test_1',type:'radio',x:70,y:73,w:-1,h:-1,text:'둘째',func:'onRadio',var:'',radioGroup:'students',itemVar:'radio_Cri1',behaviors:[]},
+      {id:'combo_test',type:'combo',x:220,y:20,w:80,h:-1,text:'',func:'onCombo',var:'combo1',items:['상시','학생선택'],itemVar:'combo_Cri1',behaviors:[]},
+      {id:'edit_test',type:'edit',x:130,y:20,w:65,h:-1,text:'센세',func:'onEdit',var:'edit1',itemVar:'edit_Cri1',behaviors:[]},
+      {id:'button_test',type:'button',x:220,y:50,w:80,h:23,text:'원격 변경',func:'onButton',itemVar:'button_Cri1',behaviors:[{id:'remote_value',condition:'always',action:'controlValue',targetItemVar:'remote_edit',value:'원격값'},{id:'remote_enable',condition:'always',action:'controlEnable',targetItemVar:'remote_combo',enable:false},{id:'remote_show',condition:'always',action:'controlShow',targetItemVar:'remote_check',show:false},{id:'button_print',condition:'always',action:'print',text:'버튼 실행'}]},
+      {id:'button_test_2',type:'button',x:220,y:80,w:80,h:23,text:'독립 동작',func:'onButton',itemVar:'button_Cri2',behaviors:[{id:'button_print_2',condition:'always',action:'print',text:'두 번째 버튼만 실행'}]}
+    ]},
+    {id:'tab_remote',name:'원격',iniSection:'',controls:[
+      {id:'remote_edit_control',type:'edit',x:20,y:20,w:100,h:-1,text:'기본값',func:'',var:'remoteEdit',itemVar:'remote_edit',behaviors:[]},
+      {id:'remote_combo_control',type:'combo',x:20,y:50,w:100,h:-1,text:'',func:'',var:'remoteCombo',items:['A','B'],itemVar:'remote_combo',behaviors:[]},
+      {id:'remote_check_control',type:'check',x:20,y:80,w:-1,h:-1,text:'표시 대상',func:'',var:'remoteCheck',itemVar:'remote_check',behaviors:[]}
+    ]}
+  ],dialogs:[],activeType:'tab',activeId:'tab_test',selectedControlId:null,xmlImages:[],xmlMeta:null,imported:{sourceName:'callbacks.lua',preludeCode:'function onButton(item_id)\n    Print(item_id)\nend',postludeCode:'',encoding:'UTF-8',parseWarnings:[]},showGrid:false,scale:1};
+  localStorage.setItem('imagemaxGuiProject',JSON.stringify(guiProject));
+  const gui=await load('../gui/?qa=r4'),win=gui.querySelector('#runtimeWindow'),canvas=gui.querySelector('#canvas'),control=gui.querySelector('[data-id="check_test"]'),comboControl=gui.querySelector('[data-id="combo_test"]'),editControl=gui.querySelector('[data-id="edit_test"]'),buttonControl=gui.querySelector('[data-id="button_test"]'),title=gui.querySelector('.imagemax-titlebar');
   const wr=win.getBoundingClientRect(),cr=canvas.getBoundingClientRect(),rr=control.getBoundingClientRect();
   assert('GUI user surface size',Math.round(wr.width)===382&&Math.round(wr.height)===346,`${wr.width}x${wr.height}`);
   assert('ImageMax chrome hidden',getComputedStyle(title).display==='none',getComputedStyle(title).display);
   assert('Lua coordinate origin',Math.round(rr.left-cr.left)===10&&Math.round(rr.top-cr.top)===53,`${rr.left-cr.left},${rr.top-cr.top}`);
   assert('No duplicate native decoration',getComputedStyle(control,'::before').content==='none',getComputedStyle(control,'::before').content);
   assert('No duplicate combo arrow',getComputedStyle(comboControl,'::after').content==='none',getComputedStyle(comboControl,'::after').content);
+  assert('Exactly one checkbox glyph',control.querySelectorAll('.native-check').length===1,control.innerHTML);
+  assert('Exactly one combo arrow',comboControl.querySelectorAll('.combo-arrow').length===1,comboControl.innerHTML);
+  assert('Edit mode uses the same native elements',editControl.querySelectorAll('input').length===1&&comboControl.querySelectorAll('select').length===1&&buttonControl.querySelectorAll('button').length===1,'native controls missing');
   const editOffset={x:rr.left-cr.left,y:rr.top-cr.top};gui.querySelector('#toggleGuiTest').click();const testedControl=gui.querySelector('[data-id="check_test"]'),testedRect=testedControl.getBoundingClientRect(),testedCanvas=canvas.getBoundingClientRect(),check=testedControl.querySelector('input'),testPanel=gui.querySelector('#guiTestPanel').getBoundingClientRect();check.click();await wait(50);
-  const combo=gui.querySelector('[data-id="combo_test"] select');combo.selectedIndex=1;combo.dispatchEvent(new Event('change',{bubbles:true}));const guiLog=gui.querySelector('#guiTestLog').textContent;
+  const combo=gui.querySelector('[data-id="combo_test"] select');combo.selectedIndex=2;combo.dispatchEvent(new Event('change',{bubbles:true}));const guiLog=gui.querySelector('#guiTestLog').textContent;
+  const edit=gui.querySelector('[data-id="edit_test"] input');edit.value='변경값';edit.dispatchEvent(new Event('change',{bubbles:true}));
+  gui.querySelector('[data-id="radio_test_1"] input').click();await wait(30);
+  gui.querySelector('[data-id="button_test"] button').click();await wait(30);
+  const interactionLog=gui.querySelector('#guiTestLog').textContent;
   assert('Edit and test geometry match',Math.round(testedRect.left-testedCanvas.left)===Math.round(editOffset.x)&&Math.round(testedRect.top-testedCanvas.top)===Math.round(editOffset.y)&&Math.round(testedRect.width)===Math.round(rr.width)&&Math.round(testedRect.height)===Math.round(rr.height),`${editOffset.x},${editOffset.y},${rr.width},${rr.height} -> ${testedRect.left-testedCanvas.left},${testedRect.top-testedCanvas.top},${testedRect.width},${testedRect.height}`);
   assert('Test log does not cover preview',testPanel.top>=canvas.getBoundingClientRect().bottom,`${testPanel.top} >= ${canvas.getBoundingClientRect().bottom}`);
   assert('GUI control interaction',check.checked&&guiLog.includes('check_Himari = 1'),guiLog);
   assert('GUI callback log',guiLog.includes('onHimari(check_Cri1)')&&guiLog.includes('히마리 선택'),guiLog);
+  assert('False behavior does not execute',guiLog.includes('check_Himari == 0 → 거짓')&&!guiLog.includes('실행되면 안 됨'),guiLog);
   assert('Combo interaction log',guiLog.includes('combo1 = 1')&&guiLog.includes('onCombo(combo_Cri1)'),guiLog);
+  assert('Edit interaction log',interactionLog.includes('edit1 = "변경값"')&&interactionLog.includes('onEdit(edit_Cri1)'),interactionLog);
+  assert('Radio group index log',interactionLog.includes('radio1 = 1')&&gui.querySelectorAll('[data-id^="radio_test_"] input:checked').length===1,interactionLog);
+  assert('Button callback and rule log',interactionLog.includes('onButton(button_Cri1)')&&interactionLog.includes('버튼 실행'),interactionLog);
+  gui.querySelector('[data-runtime-tab="tab_remote"]').click();await wait(30);
+  const remoteEdit=gui.querySelector('[data-id="remote_edit_control"] input'),remoteCombo=gui.querySelector('[data-id="remote_combo_control"] select'),remoteCheck=gui.querySelector('[data-id="remote_check_control"]');
+  assert('Cross-tab value behavior persists',remoteEdit.value==='원격값',remoteEdit.value);
+  assert('Cross-tab enable behavior persists',remoteCombo.disabled===true,String(remoteCombo.disabled));
+  assert('Cross-tab show behavior persists',remoteCheck.hidden===true,String(remoteCheck.hidden));
+  gui.querySelector('[data-runtime-tab="tab_test"]').click();gui.querySelector('#toggleGuiTest').click();gui.querySelector('#toggleGuiTest').click();await wait(30);
+  assert('Test session resets deterministically',!gui.querySelector('[data-id="check_test"] input').checked&&gui.querySelector('[data-id="combo_test"] select').selectedIndex===0&&gui.querySelector('[data-id="edit_test"] input').value==='센세',gui.querySelector('#guiTestLog').textContent);
+  gui.querySelector('#toggleGuiTest').click();
+  const initialGuiLua=gui.querySelector('#guiLuaPreview').textContent,handler=(lua,name)=>{const start=lua.indexOf(`function ${name}(`),end=lua.indexOf('\nend',start);return start<0||end<0?'':lua.slice(start,end+4)},handler1=handler(initialGuiLua,'onButton__imx_button_Cri1'),handler2=handler(initialGuiLua,'onButton__imx_button_Cri2');
+  assert('Shared callbacks get isolated handlers',handler1.includes('onButton(item_id)')&&handler2.includes('onButton(item_id)')&&handler1.includes('버튼 실행')&&!handler1.includes('두 번째 버튼만 실행')&&handler2.includes('두 번째 버튼만 실행')&&!handler2.includes('버튼 실행'),`${handler1}\n---\n${handler2}`);
+  const luaInput=gui.querySelector('#importPreScript'),luaTransfer=new frame.contentWindow.DataTransfer();luaTransfer.items.add(new frame.contentWindow.File([initialGuiLua],'GeneratedPreScript.lua',{type:'text/plain'}));luaInput.files=luaTransfer.files;luaInput.dispatchEvent(new Event('change',{bubbles:true}));await wait(250);
+  const roundTripGuiLua=gui.querySelector('#guiLuaPreview').textContent;
+  assert('GUI Lua roundtrip preserves rules',roundTripGuiLua.includes('IMAGEMAX_GUI_PROJECT_V1')&&handler(roundTripGuiLua,'onButton__imx_button_Cri1').includes('버튼 실행')&&handler(roundTripGuiLua,'onButton__imx_button_Cri2').includes('두 번째 버튼만 실행'),roundTripGuiLua.slice(0,500));
+  const selectedButton=gui.querySelector('[data-id="button_test"]');selectedButton.setPointerCapture=()=>{};selectedButton.dispatchEvent(new frame.contentWindow.PointerEvent('pointerdown',{bubbles:true,pointerId:1,clientX:0,clientY:0}));gui.querySelector('#addBehavior').click();gui.querySelector('#behaviorCondition').value='always';gui.querySelector('#behaviorAction').value='print';gui.querySelector('#behaviorAction').dispatchEvent(new Event('change',{bubbles:true}));gui.querySelector('#behaviorText').value='왕복 후 추가 규칙';gui.querySelector('#confirmBehavior').click();
+  const extendedGuiLua=gui.querySelector('#guiLuaPreview').textContent,extended1=handler(extendedGuiLua,'onButton__imx_button_Cri1'),extended2=handler(extendedGuiLua,'onButton__imx_button_Cri2'),functionNames=extendedGuiLua.split('\n').filter(line=>line.startsWith('function ')).map(line=>line.slice(9,line.indexOf('(')).trim());
+  assert('Rules remain editable after Lua roundtrip',extended1.includes('버튼 실행')&&extended1.includes('왕복 후 추가 규칙')&&!extended2.includes('왕복 후 추가 규칙')&&new Set(functionNames).size===functionNames.length,`${extended1}\n---\n${extended2}`);
   if(location.search.includes('guiOnly')){output.textContent='GUI VISUAL QA';await new Promise(()=>{})}
 
   localStorage.setItem('imagemaxScriptProject',JSON.stringify({format:'imagemax-web-script',version:6,xmlName:'test.xml',images:[{name:'히마리.png',index:1,accuracy:90,group:0,enabled:true,roi:[0,0,100,100],rect:[0,0,20,20],actions:[]}],selected:'히마리.png',scripts:{'히마리.png':[{kind:'counter',varName:'counter',threshold:2,actions:[{type:'print',params:{text:'두 번째 호출'}}]}]}}));
-  const script=await load('../script/');script.querySelector('#testLua').click();await wait(30);script.querySelector('#runSimulation').click();await wait(30);
+  const script=await load('../script/?qa=r4');script.querySelector('#testLua').click();await wait(30);script.querySelector('#runSimulation').click();await wait(30);
   const scriptLog=script.querySelector('#simulationLog').textContent;
   assert('Script call state',script.querySelector('#simulationState').textContent.includes('호출 2회'),script.querySelector('#simulationState').textContent);
   assert('Script branch log',scriptLog.includes('counter = 2 / 2')&&scriptLog.includes('두 번째 호출'),scriptLog);
   assert('No real device action',scriptLog.includes('실제 장치 입력 없이'),scriptLog);
+  script.querySelector('#saveAsTemplate').click();script.querySelector('#templateName').value='브라우저 QA 템플릿';script.querySelector('#templateDesc').value='저장·내보내기·가져오기·공유 회귀 검사';script.querySelector('#templateModalSave').click();await wait(30);
+  let storedTemplates=JSON.parse(localStorage.getItem('imagemaxCustomTemplates')||'[]'),stored=storedTemplates[0];
+  assert('Template save flow',stored?.title==='브라우저 QA 템플릿'&&stored.rules.length===1,JSON.stringify(storedTemplates));
+  const scriptWindow=frame.contentWindow,downloads=[];scriptWindow.HTMLAnchorElement.prototype.click=function(){downloads.push(this.download)};
+  script.querySelector(`[data-export-template="${stored.id}"]`).click();
+  assert('Template export flow',downloads.some(name=>name.endsWith('.imxtpl.json')),downloads.join(','));
+  script.querySelector(`[data-fav-template="${stored.id}"]`).click();
+  assert('Template favorite flow',JSON.parse(localStorage.getItem('imagemaxTemplateFavorites')||'[]').includes(stored.id),localStorage.getItem('imagemaxTemplateFavorites'));
+  let shareUrl='';scriptWindow.open=url=>{shareUrl=String(url);return null};script.querySelector(`[data-share-template="${stored.id}"]`).click();await wait(30);
+  assert('Template share flow',shareUrl.includes('github.com/ko9ma7/imagemax-web-tools/issues/new')&&decodeURIComponent(shareUrl).includes('IMAGEMAX_TEMPLATE_SUBMISSION'),shareUrl);
+  const exportedPack={format:'imagemax-template-pack',version:1,name:stored.title,description:'',author:'',templates:[stored]};scriptWindow.confirm=()=>true;script.querySelector(`[data-delete-template="${stored.id}"]`).click();
+  assert('Template delete flow',JSON.parse(localStorage.getItem('imagemaxCustomTemplates')||'[]').length===0,localStorage.getItem('imagemaxCustomTemplates'));
+  const input=script.querySelector('#templateFile'),transfer=new scriptWindow.DataTransfer();transfer.items.add(new scriptWindow.File([JSON.stringify(exportedPack)],'qa.imxtpl.json',{type:'application/json'}));input.files=transfer.files;input.dispatchEvent(new Event('change',{bubbles:true}));await wait(80);
+  storedTemplates=JSON.parse(localStorage.getItem('imagemaxCustomTemplates')||'[]');
+  assert('Template import flow',storedTemplates.some(t=>t.id===stored.id),JSON.stringify(storedTemplates));
+  assert('Community index browser flow',!script.querySelector('#communityStatus').textContent.includes('불러오지 못했습니다'),script.querySelector('#communityStatus').textContent);
+  const hub=await load('../templates/?qa=r4');
+  assert('Template hub loads community index',hub.querySelector('#communitySummary').textContent.includes('공유 템플릿 0개'),hub.querySelector('#communitySummary').textContent);
 }catch(error){checks.push({name:'uncaught',pass:false,detail:error.stack||String(error)})}
-output.textContent=JSON.stringify({pass:checks.every(x=>x.pass),checks},null,2);
+const result={pass:checks.every(x=>x.pass),checks};output.textContent=JSON.stringify(result,null,2);document.title=result.pass?'PASS: ImageMax Browser Smoke':'FAIL: ImageMax Browser Smoke';
 </script></body></html>
