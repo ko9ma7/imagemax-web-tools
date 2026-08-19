@@ -47,3 +47,10 @@ GitHub Pages처럼 정적 파일로 배포할 수 있습니다. 저장소 루트
 - 데이터/환경 11
 
 사용자가 만든 템플릿은 `.imxtpl.json` 또는 `.imxtplpack.json`으로 내보내고 다시 불러올 수 있습니다. 커뮤니티 제출 구조는 `docs/COMMUNITY_SHARING.md`를 참고하세요.
+
+
+ImageMax 웹 도구, 이미지 인식 자동화, 화면 인식 매크로, 이미지 매칭 자동화, 반복 작업 자동화, 클릭 자동화, 마우스·키보드 자동화, Windows 업무 자동화, GUI 자동화, RPA 도구, 웹 자동화 프로그램, 무료 자동화 도구, 오픈소스 매크로, GitHub 자동화 도구, 이미지 기반 자동 클릭, 화면 이미지 탐색, 템플릿 매칭, PC 반복 작업 자동화, 생산성 향상 도구를 찾는 사용자를 위한 ImageMax Web Tools입니다.
+
+
+#ImageMax #ImageMaxTools #ImageMaxWebTools #이미지맥스 #이미지맥스툴 #웹도구 #웹툴 #자동화도구 #업무자동화 #웹자동화 #이미지자동화 #매크로 #매크로프로그램 #자동화프로그램 #반복작업자동화 #PC자동화 #윈도우자동화 #GUI자동화 #화면자동화 #클릭자동화 #이미지인식 #이미지인식자동화 #화면인식 #화면인식자동화 #이미지매칭 #템플릿매칭 #ImageRecognition #ImageMatching #TemplateMatching #ComputerVision #Automation #WebAutomation #DesktopAutomation #GUIAutomation #RPA #RPA자동화 #WorkflowAutomation #TaskAutomation #ProductivityTools #DeveloperTools #OpenSource #오픈소스 #GitHub #깃허브 #GitHubTools #무료프로그램 #무료도구 #유틸리티 #웹유틸리티 #개발자도구 #생산성도구 #작업자동화 #반복작업 #단순작업자동화 #마우스자동화 #키보드자동화 #클릭매크로 #이미지매크로 #화면매크로 #컴퓨터자동화 #매크로툴 #자동화툴 #업무효율화 #업무효율 #생산성향상 #작업효율 #자동클릭 #자동입력 #자동실행 #스크립트자동화 #웹스크립트 #AutomationTools #MacroTools #ImageAutomation #ScreenAutomation #ClickAutomation #WindowsAutomation #FreeTools #WebTools
+
